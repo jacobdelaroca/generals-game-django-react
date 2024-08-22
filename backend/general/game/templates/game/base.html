@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+</head>
+<body>
+    <div class="row">
+        <div class="col-2 pieces container">
+            <div id="drag" class="row p-4 draggable">drag</div>
+            <div class="row p-4">g4</div>
+            <div class="row p-4">g3</div>
+            <div class="row p-4">g2</div>
+            <div class="row p-4">g1</div>
+            <div class="row p-4">spy</div>
+        </div>
+        <div class="col-8" id="board-area"></div>
+        <div class="col-2"></div>
+    </div>
+    <style>
+        /* Add some styles to make the element visually draggable */
+        #new-pos {
+            border: 1px solid #ccc;
+
+        }
+        .draggable {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            color: #fff;
+            text-align: center;
+            line-height: 100px;
+            position: relative;
+            cursor: move;
+        }
+        .container {
+            position: relative;
+            border: 1px solid #ccc;
+        }
+        .tile {
+            width: 75px;
+            height: 75px;
+            border: 1px solid #000;
+            background-color: aqua;
+        }
+        .tile:hover {
+            background-color: aquamarine;
+        }
+        </style>
+</body>
+<script src="{% static 'scripts/script.js' %}"></script>
+</html>
