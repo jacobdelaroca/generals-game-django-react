@@ -13,8 +13,14 @@ from .models import GameRoom, BoardLayout
 import json
 from .GeneralsGame import Game
 from django.contrib.auth import authenticate, login
+import traceback
+import copy
 
 # Create your views here.
+# intents
+IS_GAME_STARTED = "isStarted"
+TURN_UPDATE = "turnUpdate"
+INITIAL = "initial"
 
 class GameView(View):
     def get(self, request):
@@ -35,9 +41,9 @@ class JoinGameView(APIView):
             room_name = body['room_name']
             joined = GameRoom.objects.join(room_name, request.user)
             if joined:
-                return Response(status=status.HTTP_202_ACCEPTED)
+                return Response({"room_name": room_name}, status=status.HTTP_202_ACCEPTED)
             else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "unable to join"} ,status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -47,11 +53,36 @@ class GetUpdate(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        if request.user.is_authenticated:
-            print("authenticated")
-        else:
-            print("not authenticated")
-        return Response(status=status.HTTP_200_OK)
+        try:
+            room_name = request.GET.get("room_name", "")
+            intent = request.GET.get("intent", "")
+            room = GameRoom.objects.get(room_name=room_name)
+            player = "p1" if room.owner == request.user else "p2"
+            if room.owner != request.user and room.opponent != request.user:
+                return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+            
+            if intent == IS_GAME_STARTED:
+                if room.host_ready and room.opponent_ready:
+                    isTurn = room.turn == request.user
+                    return Response({"started": True, "turn": isTurn}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"started": False}, status=status.HTTP_200_OK)
+            elif intent == TURN_UPDATE:
+                is_player_turn = room.turn == request.user
+                if is_player_turn:
+                    return Response({"turn": is_player_turn, "board": room.prep_board_before_sending(player), "move": room.new_move}, status=status.HTTP_200_OK)    
+                else:
+                    return Response({"turn": is_player_turn}, status=status.HTTP_200_OK)    
+            elif intent == INITIAL:
+                preped_board = room.prep_board_before_sending(player)
+                return Response({"turn": room.turn == request.user, "player": player, "board": preped_board}, status=status.HTTP_200_OK)    
+
+            else:
+                return Response({"error": "nor found"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            traceback.print_exc()
+            return Response({"error": e}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -60,6 +91,7 @@ class MoveView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
         body = request.data
+        print(request.data)
         try:
             room_name = body["room_name"]
             move = body["move"]
@@ -77,13 +109,19 @@ class MoveView(APIView):
                 else:
                     room.turn = room.owner
                 room.board = new_board
+                room.new_move = move
                 room.save()
             else:
-                return Response(new_board, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"board": new_board, "move": move, "result": result}, status=status.HTTP_202_ACCEPTED)
+                print("here")
+                return Response({"board": new_board, "move": move}, status=status.HTTP_400_BAD_REQUEST)
+            # return board without hrevealing opponent position
+            board_copy = room.prep_board_before_sending(player)
+            return Response({"board": board_copy, "move": move, "result": result}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            print(e)
-            return Response(status=status.HTTP_400_BAD_REQUEST) 
+            traceback.print_exc()
+            print("here")
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
         
     
@@ -147,14 +185,15 @@ class CreateRoom(APIView):
         body = request.data
         try:
             room_name = body['room_name']
-            if GameRoom.objects.is_name_unique(room_name):
+            if GameRoom.objects.is_name_unique(room_name, request.user):
+                GameRoom.objects.clear(request.user)
                 GameRoom.objects.set_name(request.user, room_name)
-                return Response(status=status.HTTP_200_OK)
+                return Response({"room_name": room_name}, status=status.HTTP_200_OK)
             else:
                 print("room with same name handle later")
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "room with same name handle later"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 

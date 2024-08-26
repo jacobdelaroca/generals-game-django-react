@@ -81,7 +81,9 @@ class Game():
             result = {'winning_piece': winning_piece, 'winning_player': winning_player}
             # keep the winning piece
             board[to_x][to_y] = winning_piece
+        
         pprint(board)
+
         return board, move, result
 
     @staticmethod

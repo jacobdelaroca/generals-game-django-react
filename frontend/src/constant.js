@@ -4,6 +4,8 @@ export const WIDTH = 60
 export const Context = createContext();
 export const ConfigContext = createContext();
 export const apiUrl = "http://127.0.0.1:8000/";
+export const WIDTHPERCENT = 100 / 9;
+export const HEIGHTPERCENT = 100 / 8;
 export const PIECES = [
     { name: 'g5' }, // Gen 5 Star
     { name: 'g4' }, // Gen 4 Star

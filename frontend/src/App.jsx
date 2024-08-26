@@ -1,11 +1,6 @@
 import { useState, useEffect, createContext, useContext, useRef} from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import Cell from "./components/Cell";
-import Board from "./components/Board";
 import { WIDTH, Context } from './constant';
-import Pieces from './components/Pieces';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import PieceConfigScreen from './pages/PieceConfig';
 import Login from './pages/Login';
@@ -29,7 +24,7 @@ const router = createBrowserRouter(
           element={<MyBoards/>}
         />
       </Route>
-      <Route path='game' element={<Game/>}/>
+      <Route path='game/:roomName' element={<Game/>}/>
       <Route path='join' element={<JoinGame/>}/>
     </Route>
   )

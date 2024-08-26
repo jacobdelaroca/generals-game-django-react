@@ -1,13 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
+import copy
 
+
+# TODO move methods to model class and update usage
 class GameRoomManeger(models.Manager):
     def initialize(self):
         pass
 
     def join(self, room, opponent):
         obj = self.get(room_name=room)
-        if obj.opponent == None:
+        if obj.opponent == None or obj.opponent == opponent:
             obj.opponent = opponent
             obj.save()
             return True
@@ -17,10 +20,15 @@ class GameRoomManeger(models.Manager):
     def clear(self, owner):
         obj = self.get(owner=owner)
         obj.opponent = None
+        obj.turn = None
+        obj.host_ready = False
+        obj.opponent_ready = False
+        obj.host_layout = None
+        obj.opponent_layout = None
         obj.save()
 
-    def is_name_unique(self, name):
-        if self.filter(room_name=name).exists():
+    def is_name_unique(self, name, owner):
+        if self.filter(room_name=name).exclude(owner=owner).exists():
             return False
         else:
             return True
@@ -73,6 +81,7 @@ class GameRoomManeger(models.Manager):
 
 class GameRoom(models.Model):
     board = models.JSONField(null=True)
+    new_move = models.JSONField(null=True)
     host_layout = models.JSONField(null=True)
     opponent_layout = models.JSONField(null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
@@ -83,6 +92,16 @@ class GameRoom(models.Model):
     turn = models.ForeignKey(User, on_delete=models.CASCADE, related_name='turn', null=True)
     
     objects = GameRoomManeger()
+
+    def prep_board_before_sending(self, player):
+        board_copy = copy.deepcopy(self.board)
+        for i in range(len(board_copy)):
+            for j in range(len(board_copy[i])):
+                if player == "p1" and "p2" in board_copy[i][j]:
+                    board_copy[i][j] = self.board[i][j].split(" ")[1]
+                elif player == "p2" and "p1" in board_copy[i][j]:
+                    board_copy[i][j] = self.board[i][j].split(" ")[1]
+        return board_copy
 
 class BoardLayout(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

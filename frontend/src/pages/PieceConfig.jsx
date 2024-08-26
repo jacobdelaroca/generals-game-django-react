@@ -1,5 +1,4 @@
-import Cell from "../components/Cell";
-import Board from "../components/Board";
+
 import { useState, useEffect, useContext } from "react";
 import { WIDTH, PIECES, ConfigContext, apiUrl, Context } from "../constant";
 import PieceHolder from "../components/PieceHolder";

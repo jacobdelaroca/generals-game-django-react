@@ -25,6 +25,7 @@ const Header = () => {
                 {navItems.map((item, index) => (
                     <NavLink className='px-4 text-2xl hover:text-red-500' to={item.link} key={item.name + index.toString()}>{item.name}</NavLink>
                 ))}
+                {credentials.user}
                 {(credentials.user === "") && <NavLink className='px-4 text-2xl hover:text-red-500' to={'login'} key={"login key"}>Login</NavLink>}
             </nav>
             <main className="flex flex-grow">

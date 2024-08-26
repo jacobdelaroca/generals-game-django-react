@@ -1,17 +1,24 @@
 import { useContext, useEffect, useState } from "react";
 import { apiUrl, Context } from "../constant";
+import { useNavigate } from "react-router-dom";
 
 const JoinGame = () => {
     const {credentials} = useContext(Context);
-    const [boards, setBoards] = useState(null);
-    const [selectedBoard, setSelectedBoard] = useState(null);
-    let loaded = false;
-    useEffect(() => {
-        fetch(apiUrl + "game/my-boards/", {
-            method: "GET", // HTTP method
+    const [roomName, setRoomName] = useState('');
+    const [newRoomName, setNewRoomName] = useState('');
+    const navigate = useNavigate();
+
+    const handleJoinOnclick = (e) => {
+        e.preventDefault();
+        fetch(apiUrl + "game/join/", {
+            method: "POST", // HTTP method
             headers: {
               "Authorization": "Token " + credentials.token,
+              'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+                "room_name": roomName
+            })
           })
           .then(response => {
             console.log("Response Status:", response.status); // Log status code
@@ -23,32 +30,50 @@ const JoinGame = () => {
           })
           .then(data => {
             console.log("Response Data:", data);
-            setBoards(data);
-          }) 
-          .catch(error => console.error('Fetch error:', error)); 
-    }, [])
-
-    const handleJoinOnclick = (e) => {
-        e.preventDefault();
-        console.log(selectedBoard);
+            navigate(`/game/${roomName}`, {state: {host: false}});
+        }) 
+        .catch(error => console.error('Fetch error:', error)); 
     }
-
+    const handleCreateRoomClick = (e) => {
+        e.preventDefault();
+        fetch(apiUrl + "game/create-room/", {
+            method: "POST", // HTTP method
+            headers: {
+                "Authorization": "Token " + credentials.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "room_name": newRoomName
+            })
+        })
+        .then(response => {
+            console.log("Response Status:", response.status); // Log status code
+            if(response.ok){
+                return response.json();
+            } else {
+                return null
+            }
+        })
+        .then(data => {
+            console.log("Response Data:", data);
+            navigate(`/game/${newRoomName}`, {state: {host: true}});
+        }) 
+        .catch(error => console.error('Fetch error:', error)); 
+    }
+    
     return(
         <div className=" w-full h-1/2 flex justify-center mt-4">
-            {(boards === null) && <h1>Login first</h1>}
-            {(boards !== null) && <div className="w-2/3 flex flex-row">
-                <ul>
-                    {boards.map(board => {
-                        return <li>
-                            <button onClick={ () => setSelectedBoard(board.layout) } className="bg-purple-400 w-20 my-2">
-                                {board.name}
-                            </button>
-                            </li>
-                    })}
-                </ul>
+            {(credentials.user === '') && <h1>Login first</h1>}
+            {(credentials.user !== '') && <div className="w-2/3 flex flex-row">
+                
                 <form onSubmit={handleJoinOnclick} className="w-1/2 h-1/2 flex flex-col items-center">
-                    <input className="h-10" placeholder="room name" type="text" name="room-name" id="room-name-input" />
+                    <input className="h-10" placeholder="room name" type="text" name="room-name" id="room-name-input" value={roomName} onChange={(e) => setRoomName(e.target.value)} />
                     <input type="submit" value="Join" className=""/>
+                </form>
+
+                <form onSubmit={handleCreateRoomClick} className="w-1/2 h-1/2 flex flex-col items-center">
+                    <input className="h-10" placeholder="room name" type="text" name="room-name" id="new-room-name-input" value={newRoomName} onChange={(e) => setNewRoomName(e.target.value)} />
+                    <input type="submit" value="Create Room" className=""/>
                 </form>
             </div>}
         </div>
