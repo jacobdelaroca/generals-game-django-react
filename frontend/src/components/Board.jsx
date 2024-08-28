@@ -1,9 +1,10 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import { HEIGHTPERCENT, WIDTH, WIDTHPERCENT } from "../constant";
+import { GameContext, HEIGHTPERCENT, PIECESIMAGES, WIDTH, WIDTHPERCENT } from "../constant";
 
 
 
-function Board({board, move, updateBoard, whichPlayer}) {
+function Board({board, move, updateBoard, whichPlayer, turn}) {
+  const {myTurn} = useContext(GameContext);
   const parseData = (data) => {
     const parsedData = [];
     data.forEach((row, rowInd) => {
@@ -23,7 +24,7 @@ function Board({board, move, updateBoard, whichPlayer}) {
 
   useEffect(() => {
     if(move === null){
-      console.log("reaplying tranform", move);
+      // console.log("reaplying tranform", move);
       const elements = document.querySelectorAll('.pieces');
             elements.forEach(element => {
                 element.style.transform = 'translate(0%, 0%)'; // Apply translation
@@ -47,7 +48,8 @@ function Board({board, move, updateBoard, whichPlayer}) {
 	}
     const pieceToMove = document.getElementById(`piece-${index}`);
     pieceToMove.style.transform = `translate(${xDisp*100}%, ${yDisp * 100}%)`;
-    pieceToMove.addEventListener("transitionend", e => {updateBoard()} );
+    console.log("turn added in transition: ", myTurn);
+    pieceToMove.addEventListener("transitionend", e => {updateBoard(myTurn)});
   }, [move]);
 
   const cellClicked = (position, element) => {
@@ -72,29 +74,34 @@ function Cell({piece}) {
 //   console.log(piece);
 	const color = (piece.index % 2 === 0)? "bg-slate-50" : "bg-slate-600"; 
 	return (
-		<>
 		<div 
-			className={`${(piece.color === "")? color : piece.color} hover:bg-slate-800 aspect-square`} 
+			className={`${(piece.color === "")? "" : piece.color} border border-red-300 hover:bg-slate-800 aspect-square relative`} 
 			style={{width: `${100/9}%`}} 
 			onClick={() => {piece.onClick(piece.index, piece)}}>
-				{piece.index}
-		<div
-		className="flex items-center justify-center absolute pieces"
-		style={{
-			// top: `${0}%`,
-			// left: `${0}%`,
-			width: `${WIDTHPERCENT}%`,
-			height: `${HEIGHTPERCENT}%`,
-		}}
-		onClick={ () => {} }
-		id={`piece-${piece.index}`}
-		onTransitionEnd={() => {}} // add shit here
-		>
-		{(piece.piece !== " ") && <div className="w-10 h-10 rounded-full bg-red-200 piece">{piece.piece}</div>}
-		</div>
+        <p className="text-transparent">
+          {piece.index}
+        </p>
+      <div
+      className="flex items-center justify-center absolute pieces w-full"
+      style={{
+        top: `${7}%`,
+        left: `${5}%`,
+        width: `${90}%`,
+        height: `${90}%`,
+        // width: `${WIDTHPERCENT - 1}%`,
+        // height: `${HEIGHTPERCENT}%`,
+      }}
+      onClick={ () => {} }
+      id={`piece-${piece.index}`}
+      onTransitionEnd={() => {}} // add shit here
+      >
+      {(piece.piece.length > 2) && <img src={`${PIECESIMAGES[`${piece.piece.split(" ")[0]}`]}`}/>}
+      {/* {(piece.piece.length > 2) && piece.piece.split(" ")[0]} */}
+      {(piece.piece.length === 2) && <img src={`https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/GotG-flagW.svg/1920px-GotG-flagW.svg.png`}/>}
+      {/* {(piece.piece !== " ") && <div className="h-10 rounded-full bg-red-200 piece block aspect-square">{piece.piece}</div>} */}
+      </div>
 
 		</div>
-		</>
 	)
 }
 

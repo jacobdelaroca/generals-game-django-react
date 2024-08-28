@@ -1,7 +1,8 @@
-import { useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Board from "../components/Board"
 import { useContext, useEffect, useState } from "react";
-import { apiUrl, Context } from "../constant";
+import { apiUrl, Context, GameContext } from "../constant";
+import BoardPreview from "../components/BoardPreview";
 
 const Game = () => {
     const {credentials} = useContext(Context);
@@ -10,10 +11,11 @@ const Game = () => {
     const [started, setStarted] = useState(false);
     const [myTurn, setMyturn] = useState(false);
     const [readyButtonEnabled, setReadyButtonEnabled] = useState(true);
-    const [selectedBoard, setSelectedBoard] = useState(null);
+    const [selectedBoard, setSelectedBoard] = useState({index: -1});
     const location = useLocation();
     const { roomName } = useParams();
-    const {host} = location.state || {}
+    const {host} = location.state || {};
+	const navigate = useNavigate();
     console.log(roomName, host);
 
     useEffect(() => {
@@ -36,6 +38,10 @@ const Game = () => {
             }
         })
         .then(data => {
+			if(data === null){
+				navigator;
+				navigate('/join');
+			}
             console.log("Response Data:", data);
             setBoards(d => [...data]);
         }) 
@@ -59,7 +65,7 @@ const Game = () => {
             },
             body: JSON.stringify({
                 "room_name": roomName,
-                "layout": selectedBoard.layout
+                "layout": selectedBoard.id
             })
         })
         .then(response => {
@@ -80,14 +86,19 @@ const Game = () => {
     }
 
     return(
-        <div>
+        <div className="w-full flex items-center flex-col">
             <h1>Room: {roomName}</h1>
-            {(!ready && !started) && <div>
-                <ul>
+            {(!ready && !started) && 
+			<div className="w-2/3">
+                <ul className="grid grid-cols-2 gap-4">
                     {boards.map((board, index) => (
-                        <li key={index} onClick={() => {selectBoard(board, index)}}>
-                            {board.name}
-                            {(selectedBoard !== null && selectedBoard.index === index) && <span> ---selected</span>}
+                        <li className="flex flex-col items-center" key={index} onClick={() => {selectBoard(board, index)}}>
+							<h3 className="text-xl">
+								{board.name}
+							</h3>
+							<div className={`w-[90%] ${(index === selectedBoard.index) ? "border-green-600 border-4 rounded-lg" : ""}`}>
+								<BoardPreview board={board.layout} />
+							</div>
                             </li>
                         ))}
                 </ul>
@@ -137,219 +148,6 @@ const WaitingPanel = ( {setStarted, roomName, setMyturn} ) => {
     )
 }
 
-const prevData = {
-	"board": [
-		[
-			" ",
-			" ",
-			" ",
-			"p2",
-			"p2",
-			"p2",
-			" ",
-			" ",
-			"p2"
-		],
-		[
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2"
-		],
-		[
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			" ",
-			"p2"
-		],
-		[
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" "
-		],
-		[
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" "
-		],
-		[
-			"g3 p1",
-			" ",
-			" ",
-			"p p1",
-			"lc p1",
-			"g5 p1",
-			"p p1",
-			" ",
-			" "
-		],
-		[
-			" ",
-			"l1 p1",
-			"sp p1",
-			"cp p1",
-			"sg p1",
-			"p p1",
-			" ",
-			"g4 p1",
-			"sp p1"
-		],
-		[
-			"l2 p1",
-			"m p1",
-			"cl p1",
-			"p p1",
-			"p p1",
-			"f p1",
-			"g1 p1",
-			"g2 p1",
-			"p p1"
-		]
-	],
-	"move": [
-		[
-			6,
-			0
-		],
-		[
-			7,
-			0
-		]
-	],
-	"result": {
-		"winning_piece": null,
-		"winning_player": null
-	}
-}
-
-const dummyData = {
-	"board": [
-		[
-			" ",
-			" ",
-			" ",
-			"p2",
-			"p2",
-			"p2",
-			" ",
-			" ",
-			"p2"
-		],
-		[
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2"
-		],
-		[
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			"p2",
-			" ",
-			"p2"
-		],
-		[
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" "
-		],
-		[
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" ",
-			" "
-		],
-		[
-			"g3 p1",
-			" ",
-			" ",
-			"p p1",
-			"lc p1",
-			"g5 p1",
-			"p p1",
-			" ",
-			" "
-		],
-		[
-			"l2 p1",
-			"l1 p1",
-			"sp p1",
-			"cp p1",
-			"sg p1",
-			"p p1",
-			" ",
-			"g4 p1",
-			"sp p1"
-		],
-		[
-			" ",
-			"m p1",
-			"cl p1",
-			"p p1",
-			"p p1",
-			"f p1",
-			"g1 p1",
-			"g2 p1",
-			"p p1"
-		]
-	],
-	"move": [
-		[
-			7,
-			0
-		],
-		[
-			6,
-			0
-		]
-	],
-	"result": {
-		"winning_piece": null,
-		"winning_player": null
-	}
-}
 
 export const GamePanel = ({roomName}) => {
     const {credentials} = useContext(Context);
@@ -358,9 +156,11 @@ export const GamePanel = ({roomName}) => {
     const [newBoard, setNewBoard] = useState([]);
     const [move, setMove] = useState(null);
 	const [whichPlayer, setWhichPlayer] = useState("");
+    const navigate = useNavigate();
 
 
-	const parseData = (data) => {
+	const parseData = (data, turn) => {
+		console.log("turn when parsed", turn);
 		let parsedData = [];
 		data.forEach((row, rowInd) => {
 			row.forEach((col, colInd) => {
@@ -376,10 +176,11 @@ export const GamePanel = ({roomName}) => {
 		parsedData = parsedData.map((cell, index) => ({
 			...cell, 
 			onClick: 
-				(cell.piece.length > 2) ? 
+				(cell.piece.length > 2 && turn) ? 
 					showAvailableMoves : () => {},
 			color: ""
 				}));
+		console.log(parsedData);
 		return parsedData;
 	}
 
@@ -406,9 +207,7 @@ export const GamePanel = ({roomName}) => {
 				onClick: 
 					(cell.piece.length > 2) ? 
 						() => { showAvailableMoves(index, cell) } : () => {},
-				color: 
-					(index % 2 === 0) ?
-						 "bg-slate-50" : "bg-slate-600"
+				color: ''
 					}))
 		))
 	} 
@@ -438,6 +237,16 @@ export const GamePanel = ({roomName}) => {
 		.then(data => {
 			console.log("Response Data:", data);
 			console.log("turn: ", myTurn);
+            if(data.winner !== null){
+                console.log("winner", data.winner);
+                if(data.winner){
+                    alert("you won");
+                } else {
+                    alert("you lost");
+                }
+                navigate("/");
+                return;
+            }
 			setMyturn(data.turn);
 			setMove(data.move);
 			setNewBoard(data.board);
@@ -467,19 +276,20 @@ export const GamePanel = ({roomName}) => {
 			setMove(null);
 			setWhichPlayer(data.player);
 			if(data.player === "p2"){
-				setBoard(parseData(data.board).reverse());
+				setBoard(parseData(data.board, data.turn).reverse());
 			} else {
-				setBoard(parseData(data.board));
+				setBoard(parseData(data.board, data.turn));
 			}
 		}) 
 		.catch(error => console.error('Fetch error:', error));
     }, [])
 
-    const updateBoard = () => {
+    const updateBoard = (turn) => {
+		console.log('myTurn whe updated', turn);
 		if(whichPlayer === "p2"){
-			setBoard(d => parseData(newBoard).reverse());
+			setBoard(d => parseData(newBoard, turn).reverse());
 		} else {
-			setBoard(d => parseData(newBoard));
+			setBoard(d => parseData(newBoard, turn));
 		}
 		setMove(null);
     }
@@ -504,16 +314,30 @@ export const GamePanel = ({roomName}) => {
                 })
                 .then(data => {
                     console.log("Response Data:", data);
-                    
+                    if(data.winner !== null){
+                        if(data.winner){
+                            alert("you won");
+                        } else {
+                            alert("you lost");
+                        }
+                        navigate("/");
+                        return;
+                    }
 					if(data.turn){
 						setMove(data.move);
 						setNewBoard(data.board);
+						console.log("positive turn update no more should follow");
+					} else {
+						console.log("negative turn update");
 					}
-                    setMyturn(data.turn);
+                    setMyturn(t => data.turn);
                 }) 
                 .catch(error => console.error('Fetch error:', error)); 
             }, 1000);
-        }
+        } else {
+			console.log("useEffect update", myTurn);
+			updateBoard(myTurn);
+		}
         return () => {
             if(intervalId){
                 clearInterval(intervalId);
@@ -522,14 +346,18 @@ export const GamePanel = ({roomName}) => {
     }, [myTurn])
     
     return (
+		<GameContext.Provider value={{myTurn}}>
         <div>
             <Board 
+			turn={myTurn}
 			board={board} 
 			move={move} 
 			updateBoard={updateBoard}
 			whichPlayer={whichPlayer}
 			/>
         </div>
+
+		</GameContext.Provider>
     )
 }
 

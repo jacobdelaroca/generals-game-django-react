@@ -57,6 +57,9 @@ class GetUpdate(APIView):
             room_name = request.GET.get("room_name", "")
             intent = request.GET.get("intent", "")
             room = GameRoom.objects.get(room_name=room_name)
+            winner = None
+            if room.winner is not None:
+                winner = room.winner == request.user
             player = "p1" if room.owner == request.user else "p2"
             if room.owner != request.user and room.opponent != request.user:
                 return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -68,11 +71,12 @@ class GetUpdate(APIView):
                 else:
                     return Response({"started": False}, status=status.HTTP_200_OK)
             elif intent == TURN_UPDATE:
+                print("update winner", winner)
                 is_player_turn = room.turn == request.user
                 if is_player_turn:
-                    return Response({"turn": is_player_turn, "board": room.prep_board_before_sending(player), "move": room.new_move}, status=status.HTTP_200_OK)    
+                    return Response({"turn": is_player_turn, "winner": winner, "board": room.prep_board_before_sending(player), "move": room.new_move}, status=status.HTTP_200_OK)    
                 else:
-                    return Response({"turn": is_player_turn}, status=status.HTTP_200_OK)    
+                    return Response({"turn": is_player_turn, "winner": winner}, status=status.HTTP_200_OK)    
             elif intent == INITIAL:
                 preped_board = room.prep_board_before_sending(player)
                 return Response({"turn": room.turn == request.user, "player": player, "board": preped_board}, status=status.HTTP_200_OK)    
@@ -101,22 +105,45 @@ class MoveView(APIView):
                 return Response({"error": "not your turn"}, status=status.HTTP_403_FORBIDDEN)
 
             player = "p1" if room.owner == request.user else "p2"
-            new_board, move, result = Game.move(room.board, player, move)
-            
+
+            if room.owner == request.user:
+                if room.opponent_flag_in_place:
+                    print("confirmed in place")
+                    room.winner = room.opponent
+                    room.save()
+                    return Response({"board": [], "move": [], "result": [], "turn": room.turn == request.user, "winner":False}, status=status.HTTP_202_ACCEPTED)
+            else:
+                if room.owner_flag_in_place:
+                    print("confirmed in place")
+                    room.winner = room.owner
+                    room.save()
+                    return Response({"board": [], "move": [], "result": [], "turn": room.turn == request.user, "winner":False}, status=status.HTTP_202_ACCEPTED)
+                    
+            new_board, move, result, winner, flag_in_place = Game.move(room.board, player, move)
+            print("return from move, flag in position: ", flag_in_place)
+            if winner is not None: winner = winner == player
             if new_board is not None:
                 if room.turn == room.owner:
+                    room.owner_flag_in_place = flag_in_place
                     room.turn = room.opponent
                 else:
+                    room.opponent_flag_in_place = flag_in_place
                     room.turn = room.owner
                 room.board = new_board
                 room.new_move = move
+                if winner is not None:
+                    if winner == player:
+                        room.winner = request.user
+                    else:
+                        room.winner = room.opponent if request.user != room.owner else room.owner 
                 room.save()
             else:
                 print("here")
                 return Response({"board": new_board, "move": move}, status=status.HTTP_400_BAD_REQUEST)
             # return board without hrevealing opponent position
             board_copy = room.prep_board_before_sending(player)
-            return Response({"board": board_copy, "move": move, "result": result}, status=status.HTTP_202_ACCEPTED)
+            print("winner", winner)
+            return Response({"board": board_copy, "move": move, "result": result, "turn": room.turn == request.user, "winner":winner}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             traceback.print_exc()
             print("here")
@@ -132,8 +159,12 @@ class PlayerReadyView(APIView):
         body = request.data
         try:
             room_name = body['room_name']
-            layout = body['layout']
+            layout_id = body['layout']
             room = GameRoom.objects.get(room_name=room_name)
+            board = BoardLayout.objects.get(pk=layout_id)
+            if board.owner != request.user: 
+                return Response({"error": "not your board"}, status=status.HTTP_403_FORBIDDEN)
+            layout = board.layout
             if request.user == room.owner:
                 room.host_layout = layout
                 room.host_ready = True
@@ -172,7 +203,7 @@ class AddBoardView(APIView):
             name = body['name']
             new_board = BoardLayout(owner=request.user, layout=layout, name=name)
             new_board.save()
-            return Response(status=status.HTTP_201_CREATED)
+            return Response({"message": "created"}, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_400_BAD_REQUEST)

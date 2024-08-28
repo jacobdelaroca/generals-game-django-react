@@ -25,6 +25,9 @@ class GameRoomManeger(models.Manager):
         obj.opponent_ready = False
         obj.host_layout = None
         obj.opponent_layout = None
+        obj.winner = None
+        obj.owner_flag_in_place = False
+        obj.opponent_flag_in_place = False
         obj.save()
 
     def is_name_unique(self, name, owner):
@@ -90,7 +93,9 @@ class GameRoom(models.Model):
     opponent_ready = models.BooleanField(default=False)
     opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='opponent', null=True)
     turn = models.ForeignKey(User, on_delete=models.CASCADE, related_name='turn', null=True)
-    
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='winner', null=True)
+    owner_flag_in_place = models.BooleanField(default=False)
+    opponent_flag_in_place = models.BooleanField(default=False)
     objects = GameRoomManeger()
 
     def prep_board_before_sending(self, player):

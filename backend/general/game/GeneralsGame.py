@@ -71,20 +71,31 @@ class Game():
         board[org_x][org_y] = ' '
 
         result = {"winning_piece": None, "winning_player": None}
+        winner = None
+        flag_in_place = False
 
         # move into empty square
         if board[to_x][to_y] == ' ':
+            piece_name, piece_player = piece.split(' ')
+            if piece_name == "f":
+                print("moving flag")
+                if piece_player == "p1" and to_x == 0:
+                    print("flag in position")
+                    flag_in_place = True    
+                if piece_player == "p2" and to_x == 7:
+                    flag_in_place = True    
+                    print("flag in position")
             board[to_x][to_y] = piece
         else:
             opponent_piece = board[to_x][to_y]
-            winning_piece, winning_player = Game.judge(piece, opponent_piece)
+            winning_piece, winning_player, winner = Game.judge(piece, opponent_piece)
             result = {'winning_piece': winning_piece, 'winning_player': winning_player}
             # keep the winning piece
             board[to_x][to_y] = winning_piece
         
         pprint(board)
 
-        return board, move, result
+        return board, move, result, winner, flag_in_place
 
     @staticmethod
     def judge(challenger, opponent):
@@ -95,24 +106,28 @@ class Game():
             # flag challenge another flag
             if challenger_piece == 'f' and opponent_piece == 'f':
                 # handle flag v flag
-                return
+                return challenger, challenger_piece, challenger_player
 
             # spy challenged private or vice versa
             if not challenger_piece == opponent_piece:
                 if challenger_piece == 'p':
-                    return challenger, challenger_player
+                    return challenger, challenger_player, None
                 else:
-                    return opponent, opponent_player
+                    return opponent, opponent_player, None
             
             # same piece but not flags
             return ' ', None
         else:
+            if opponent_piece == "f":
+                return challenger, challenger_player, challenger_player
+            if challenger_piece == "f":
+                return opponent, opponent_player, opponent_player
             # challenger is higher ranked
             if piece_ranks[challenger_piece] > piece_ranks[opponent_piece]:
-                return challenger, challenger_player
+                return challenger, challenger_player, None
             # opponent is higher ranked
             elif piece_ranks[challenger_piece] < piece_ranks[opponent_piece]:
-                return opponent, opponent_player
+                return opponent, opponent_player, None
             # same rank both get removed
             else:
                 return ' ', None

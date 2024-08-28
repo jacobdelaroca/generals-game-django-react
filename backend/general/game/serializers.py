@@ -10,4 +10,4 @@ class UserSerializer(serializers.ModelSerializer):
 class BoardSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = BoardLayout
-        fields = ['layout', "name", "owner"]
+        fields = ['layout', "name", "owner", "id"]

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useContext } from "react";
-import { WIDTH, PIECES, ConfigContext, apiUrl, Context } from "../constant";
+import { WIDTH, PIECES, ConfigContext, apiUrl, Context, PIECESIMAGES, WIDTHPERCENT } from "../constant";
 import PieceHolder from "../components/PieceHolder";
 
 
@@ -93,22 +93,22 @@ const PieceConfigScreen = () => {
         console.log("Response Status:", response.status); // Log status code
         return response.json(); // Parse JSON response
       })
-      .then(data => console.log("Response Data:", data)) // Log response data
+      .then(data => {
+        // console.log("Response Data:", data);
+        clearBoard();
+      }) // Log response data
       .catch(error => console.error('Fetch error:', error)); // Handle errors
     }
 
-    const login = () => {
-      fetch("http://127.0.0.1:8000/login/", {
-        method: "POST",
-        credentials: 'include',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({"username": "test2", "password":"test"}),
-      })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error("Error:", error));
+    const clearBoard = () => {
+      const tempPositions = cells.map( (cell) => 
+        ({
+            position: cell.position,
+            piece: null
+        })
+      );
+      setPiecePositions(tempPositions);
+      setPiecesInHolder([...PIECES]);
     }
 
     const handleCellClick = (position, name) => {
@@ -147,15 +147,18 @@ const PieceConfigScreen = () => {
           </ConfigContext.Provider>
         </div>
         <button className="" onClick={ saveBoard }>Save</button>
-        <button className="" onClick={ login }>Login</button>
+        <button className="" onClick={ clearBoard }>Clear</button>
       </div>
     )
   }
 
   const ConfigBoard = ({ cells, dims, pieces }) => {
+    console.log("cells length: ", cells.length)
     return (
         <>
-          <div className={`grid grid-cols-9 relative `} style={ { width: `${WIDTH * dims.width}px`, height: `${WIDTH * dims.height}px` } }>
+          <div 
+          className={`flex flex-wrap w-[60%]`} 
+          style={ {  } }>
             { cells.map( (cell, index) => {
               return <ConfigCell position={ cell.position } key={ index } name={pieces[index].piece}/>
             }) }
@@ -170,8 +173,9 @@ const PieceConfigScreen = () => {
     return (
         <>
         <div 
-        className={`${color} hover:bg-green-300 h-[${WIDTH}] flex-shrink-0 flex-grow-0 overflow-hidden`} 
+        className={`${""} border border-red-300 hover:bg-green-300 aspect-square flex items-center justify-center`} 
         onClick={() => handleCellClick(position, name)}
+        style={ { width: `${WIDTHPERCENT}%` } }
         onDragOver={ (event) => {
             event.preventDefault();
         } }
@@ -179,8 +183,10 @@ const PieceConfigScreen = () => {
             onDropHandler(event, position);
         }}
         >
+        <p className="h-0 w-0">&nbsp;</p>
             {/* {position} */}
-        <div className="text-l">{(name === null)? "": name}</div>
+        {/* <div className="text-l flex justify-center">{(name === null)? "": <img src={`${PIECESIMAGES[name]}`} className="w-[90%]" />}</div> */}
+        {(name === null)? "": <img src={`${PIECESIMAGES[name]}`} className="w-[90%]" />}
         </div>
         </>
     )
