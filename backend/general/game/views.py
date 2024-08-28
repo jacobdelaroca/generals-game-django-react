@@ -39,7 +39,8 @@ class JoinGameView(APIView):
         body = request.data
         try:
             room_name = body['room_name']
-            joined = GameRoom.objects.join(room_name, request.user)
+            room = GameRoom.objects.get(room_name=room_name)
+            joined = room.join(request.user)
             if joined:
                 return Response({"room_name": room_name}, status=status.HTTP_202_ACCEPTED)
             else:
@@ -170,13 +171,13 @@ class PlayerReadyView(APIView):
                 room.host_ready = True
                 room.save()
                 if room.opponent_layout is not None:
-                    GameRoom.objects.init_board(room_name)
+                    room.init_board()
             elif request.user == room.opponent:
                 room.opponent_layout = layout
                 room.opponent_ready = True
                 room.save()
                 if room.host_layout is not None:
-                    GameRoom.objects.init_board(room_name)
+                    room.init_board()
             else:
                 return Response({"error": "Room not joined"}, status=status.HTTP_401_UNAUTHORIZED)
             return Response(status=status.HTTP_200_OK)
@@ -216,9 +217,10 @@ class CreateRoom(APIView):
         body = request.data
         try:
             room_name = body['room_name']
+            room = GameRoom.objects.get(room_name=room_name)
             if GameRoom.objects.is_name_unique(room_name, request.user):
-                GameRoom.objects.clear(request.user)
-                GameRoom.objects.set_name(request.user, room_name)
+                room.clear()
+                room.set_name(room_name)
                 return Response({"room_name": room_name}, status=status.HTTP_200_OK)
             else:
                 print("room with same name handle later")
