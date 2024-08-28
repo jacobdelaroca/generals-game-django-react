@@ -10,6 +10,10 @@ const JoinGame = () => {
 
     const handleJoinOnclick = (e) => {
         e.preventDefault();
+        if(roomName === ""){
+            alert("name cannot be empty");
+            return;
+        }
         fetch(apiUrl + "game/join/", {
             method: "POST", // HTTP method
             headers: {
@@ -25,17 +29,28 @@ const JoinGame = () => {
             if(response.ok){
                 return response.json();
             } else {
-                return null
+                return response.json();
             }
           })
           .then(data => {
+            if(data.error){
+                throw new Error(data.error);
+            }
             console.log("Response Data:", data);
             navigate(`/game/${roomName}`, {state: {host: false}});
         }) 
-        .catch(error => console.error('Fetch error:', error)); 
+        .catch(error => {
+            alert(error);
+            console.error('Fetch error:', error); 
+            navigate(`/join`, {state: {host: true}});    
+        })
     }
     const handleCreateRoomClick = (e) => {
         e.preventDefault();
+        if(newRoomName === ""){
+            alert("name cannot be empty");
+            return;
+        }
         fetch(apiUrl + "game/create-room/", {
             method: "POST", // HTTP method
             headers: {
@@ -51,14 +66,18 @@ const JoinGame = () => {
             if(response.ok){
                 return response.json();
             } else {
-                return null
+                throw new Error("Room with same name exist")
             }
         })
         .then(data => {
             console.log("Response Data:", data);
             navigate(`/game/${newRoomName}`, {state: {host: true}});
         }) 
-        .catch(error => console.error('Fetch error:', error)); 
+        .catch(error => {
+            alert(error);
+            console.error('Fetch error:', error); 
+            navigate(`/join`, {state: {host: true}});    
+        })
     }
     
     return(

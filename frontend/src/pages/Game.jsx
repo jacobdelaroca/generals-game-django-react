@@ -23,6 +23,36 @@ const Game = () => {
     }, [started])
 
     useEffect(() => {
+        let resume = false
+        fetch(apiUrl + `game/update/?room_name=${roomName}&intent=resume`, {
+            method: "GET", // HTTP method
+            headers: {
+                "Authorization": "Token " + credentials.token,
+            }
+        })
+        .then(response => {
+            console.log("Response Status:", response.status); // Log status code
+            if(response.ok){
+                return response.json();
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            console.log("Response Data:", data);
+            if(data.resume){
+                setStarted(true);
+                setReady(false);
+                resume = true;
+                return;
+            } else {
+                throw new Error(data.error);
+            }
+        }) 
+        .catch(error => console.error('Fetch error:', error)); 
+
+        if(resume) return;
+
         fetch(apiUrl + "game/my-boards/", {
             method: "GET", // HTTP method
             headers: {
@@ -228,13 +258,12 @@ export const GamePanel = ({roomName}) => {
 		})
 		.then(response => {
 			console.log("Response Status:", response.status); // Log status code
-			if(response.ok){
-				return response.json();
-			} else {
-				return null
-			}
+			return response.json()
 		})
 		.then(data => {
+            if(data.error){
+                throw new Error(data.error)
+            }
 			console.log("Response Data:", data);
 			console.log("turn: ", myTurn);
             if(data.winner !== null){
@@ -251,7 +280,11 @@ export const GamePanel = ({roomName}) => {
 			setMove(data.move);
 			setNewBoard(data.board);
 		}) 
-		.catch(error => console.error('Fetch error:', error));
+		.catch(error => {
+            console.error('Fetch error:', error)
+            alert(error);
+            navigate('/');
+        });
 	} 
 
     useEffect(() => {
@@ -306,13 +339,12 @@ export const GamePanel = ({roomName}) => {
                 })
                 .then(response => {
                     console.log("Response Status:", response.status); // Log status code
-                    if(response.ok){
-                        return response.json();
-                    } else {
-                        return null
-                    }
+                    return response.json();
                 })
                 .then(data => {
+                    if(data.error){
+                        throw new Error(data.error);
+                    }
                     console.log("Response Data:", data);
                     if(data.winner !== null){
                         if(data.winner){
@@ -332,7 +364,11 @@ export const GamePanel = ({roomName}) => {
 					}
                     setMyturn(t => data.turn);
                 }) 
-                .catch(error => console.error('Fetch error:', error)); 
+                .catch(error => {
+                    console.error('Fetch error:', error)
+                    alert(error);
+                    navigate("/");
+                }); 
             }, 1000);
         } else {
 			console.log("useEffect update", myTurn);

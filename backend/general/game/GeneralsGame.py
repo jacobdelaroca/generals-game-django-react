@@ -40,7 +40,6 @@ special_pieces = ['sp', 'p', 'f']
 # gen 3 star x1       g3
 # gen 2 star x1       g2
 # gen 1 star x1       g1
-# brigader gen x1     bg
 # colonel x1          cl
 # lt col x1           lc
 # major x1            m
@@ -119,8 +118,10 @@ class Game():
             return ' ', None
         else:
             if opponent_piece == "f":
+                print("wiiner challenger")
                 return challenger, challenger_player, challenger_player
             if challenger_piece == "f":
+                print("wiiner challenged")
                 return opponent, opponent_player, opponent_player
             # challenger is higher ranked
             if piece_ranks[challenger_piece] > piece_ranks[opponent_piece]:
@@ -133,6 +134,32 @@ class Game():
                 return ' ', None
 
 
+    
+    @staticmethod
+    def validate_layout(board):
+        if len(board) != 3: return False
+        for row in board: 
+            if len(row) != 9: return False
+        board_unfolded = [*board[0], *board[1], *board[2]]
+        if board_unfolded.count("g5") != 1: return False
+        if board_unfolded.count("g4") != 1: return False
+        if board_unfolded.count("g3") != 1: return False
+        if board_unfolded.count("g2") != 1: return False
+        if board_unfolded.count("g1") != 1: return False
+        if board_unfolded.count("cl") != 1: return False
+        if board_unfolded.count("lc") != 1: return False
+        if board_unfolded.count("m") != 1: return False
+        if board_unfolded.count("cp") != 1: return False
+        if board_unfolded.count("l1") != 1: return False
+        if board_unfolded.count("l2") != 1: return False
+        if board_unfolded.count("sg") != 1: return False
+        if board_unfolded.count("p") != 6: return False
+        if board_unfolded.count("sp") != 2: return False
+        if board_unfolded.count("f") != 1: return False
+        return True
+
+
+    
     
     @staticmethod
     def validate(board, player, move):
