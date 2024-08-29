@@ -8,77 +8,12 @@ class GameRoomManeger(models.Manager):
     def initialize(self):
         pass
 
-    # def join(self, room, opponent):
-    #     obj = self.get(room_name=room)
-    #     if obj.opponent == None or obj.opponent == opponent:
-    #         obj.opponent = opponent
-    #         obj.save()
-    #         return True
-    #     else:
-    #         return False
-        
-    # def clear(self, owner):
-    #     obj = self.get(owner=owner)
-    #     obj.opponent = None
-    #     obj.turn = None
-    #     obj.host_ready = False
-    #     obj.opponent_ready = False
-    #     obj.host_layout = None
-    #     obj.opponent_layout = None
-    #     obj.winner = None
-    #     obj.owner_flag_in_place = False
-    #     obj.opponent_flag_in_place = False
-    #     obj.save()
-
     def is_name_unique(self, name, owner):
         if self.filter(room_name=name).exclude(owner=owner).exists():
             return False
         else:
             return True
     
-    # def set_name(self, owner, room_name):
-    #     obj = self.get(owner=owner)
-    #     obj.room_name = room_name
-    #     obj.save()
-
-
-    # def init_board(self, room_name):
-    #     obj = self.get(room_name=room_name)
-    #     board = [] 
-    #     host_layout_raw = obj.host_layout
-    #     host_layout = []
-
-    #     for row in host_layout_raw:
-    #         new_row = []
-    #         for item in row:
-    #             if item == " ":
-    #                 new_row.append(item)
-    #             else:
-    #                 new_row.append(item + " p1")
-    #         host_layout.append(new_row)
-    #     opp_layout_raw = obj.opponent_layout
-    #     opp_layout = []
-
-    #     for row in opp_layout_raw:
-    #         new_row = []
-    #         for item in row:
-    #             if item == " ":
-    #                 new_row.append(item)
-    #             else:
-    #                 new_row.append(item + " p2")
-    #         opp_layout.append(new_row)
-    #     opp_layout.reverse()
-    #     opp_layout_reversed = [list(reversed(row)) for row in opp_layout]
-
-    #     board.extend(opp_layout_reversed)
-    #     board.append([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']) 
-    #     board.append([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']) 
-    #     board.extend(host_layout)
-        
-    #     obj.board = board
-    #     obj.turn = obj.owner
-    #     obj.save()
-
 
 
 
@@ -119,6 +54,7 @@ class GameRoom(models.Model):
     def clear(self):
         self.opponent = None
         self.turn = None
+        self.room_name = None
         self.host_ready = False
         self.opponent_ready = False
         self.host_layout = None

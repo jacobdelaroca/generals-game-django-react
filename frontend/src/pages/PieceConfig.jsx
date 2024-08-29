@@ -2,14 +2,21 @@
 import { useState, useEffect, useContext } from "react";
 import { WIDTH, PIECES, ConfigContext, apiUrl, Context, PIECESIMAGES, WIDTHPERCENT } from "../constant";
 import PieceHolder from "../components/PieceHolder";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 const PieceConfigScreen = () => {
+    const location = useLocation(); 
+    const {board, boardName, boardId} = location.state || {board: [], boardName: "", id: null}
     const [cells, setCells] = useState([]);
-    const [name, setName] = useState('test name');
-    const [piecePositions, setPiecePositions] = useState([]);
+    const [id, setId] = useState(boardId)
+    const [name, setName] = useState(boardName);
+    const [piecePositions, setPiecePositions] = useState(board);
     const [piecesInHolder, setPiecesInHolder] = useState([...PIECES]);
+    const [pieceToPlace, setPieceToPlace] = useState("");
     const { credentials } = useContext(Context);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
       const tempCells = [];
@@ -19,6 +26,20 @@ const PieceConfigScreen = () => {
         });
       }
       setCells(tempCells);
+
+
+      if(piecePositions.length !== 0){
+        const tempPositions = [...piecePositions[0], ...piecePositions[1], ...piecePositions[2]].map((cell, index) => {
+          return {
+            position: tempCells[index].position,
+            piece: (cell === " ") ? null : cell
+          }
+        })
+        setPiecePositions(tempPositions);
+        setPiecesInHolder([]);
+        console.log("state available new pos: ", tempPositions);
+        return;
+      } 
       const tempPositions = tempCells.map( (cell) => 
         ({
             position: cell.position,
@@ -28,7 +49,32 @@ const PieceConfigScreen = () => {
       setPiecePositions(tempPositions);
       
     }, []);
-  
+
+    const placePieceHandler = (position) => {
+      if(piecePositions[position].piece !== null){
+        console.log("already a piece");
+        return;
+      }
+      const data = pieceToPlace.split(" ");
+      const pieceName = data[0];
+      const holderPos = data[1];
+      const newPieceInHolder = piecesInHolder.filter((p, index) => index !== Number(holderPos));
+      setPiecesInHolder(newPieceInHolder)
+      const updatedPiecePosition = piecePositions.map(pieceObj => {
+          if(pieceObj.position !== position){
+              return pieceObj;
+          } else {
+              return {
+                  position: pieceObj.position,
+                  piece: pieceName
+              }
+          }
+      })
+      setPiecePositions(updatedPiecePosition);
+      console.log(updatedPiecePosition);
+      setPieceToPlace("");
+    }
+
     const onDropHandler = (event, position) => {
         event.preventDefault();
         if(piecePositions[position].piece !== null){
@@ -52,10 +98,13 @@ const PieceConfigScreen = () => {
         })
         setPiecePositions(updatedPiecePosition);
         console.log(updatedPiecePosition);
+        setPieceToPlace("");
     }
     
     const saveBoard = () => {
       
+      console.log("id:", id);
+
       if(piecesInHolder.length !== 0){
         console.log("some pieces still remining");
         alert("some pieces still remining");
@@ -77,7 +126,40 @@ const PieceConfigScreen = () => {
         }));
       }
 
-
+      if(id !== undefined){
+        fetch(apiUrl + "game/add-board/" + String(id) + "/", {
+          method: "PUT", // HTTP method
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: "Token " + credentials.token,
+          },
+          body: JSON.stringify({
+            layout: result,
+            name: name,
+          })
+        })
+        .then(response => {
+          console.log("Response Status:", response.status); // Log status code
+          if(!response.ok){
+            return null;
+          }
+          return response.json(); // Parse JSON response
+        })
+        .then(data => {
+          if(data === null){
+            alert("something went wrong");
+          } else {
+            // console.log("Response Data:", data);
+            // clearBoard();
+            alert("updated");
+            navigate("/layout/boards");
+            return;
+          }
+        }) // Log response data
+        .catch(error => console.error('Fetch error:', error)); // Handle errors
+      }
+      
+      
       fetch(apiUrl + "game/add-board/", {
         method: "POST", // HTTP method
         headers: {
@@ -94,10 +176,15 @@ const PieceConfigScreen = () => {
         return response.json(); // Parse JSON response
       })
       .then(data => {
+        if(data.error){
+          throw new Error(data.error);
+        }
         // console.log("Response Data:", data);
         clearBoard();
+        alert("updated");
+        navigate("/layout/boards");
       }) // Log response data
-      .catch(error => console.error('Fetch error:', error)); // Handle errors
+      .catch(error => {console.error('Fetch error:', error); alert(error);}); // Handle errors
     }
 
     const clearBoard = () => {
@@ -112,6 +199,10 @@ const PieceConfigScreen = () => {
     }
 
     const handleCellClick = (position, name) => {
+        if(pieceToPlace !== ""){
+          placePieceHandler(position);
+          return;
+        }
         console.log(position, name);
         if(name === null){
             console.log("no piece to return");
@@ -139,7 +230,7 @@ const PieceConfigScreen = () => {
           {/* <MyContext.Provider>
             <Board cells={ cells } />
             </MyContext.Provider> */}
-          <PieceHolder pieces={piecesInHolder}/>
+          <PieceHolder pieces={piecesInHolder} setPieceToPlace={setPieceToPlace} pieceToPlace={pieceToPlace}/>
           <div className="w-20"/>
 
           <ConfigContext.Provider value={ {onDropHandler, handleCellClick} }>

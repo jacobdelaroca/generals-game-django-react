@@ -66,6 +66,8 @@ class GetUpdate(APIView):
             winner = None
             if room.winner is not None:
                 winner = room.winner == request.user
+                print("update requester is winner: ", room.winner == request.user)
+            
             player = "p1" if room.owner == request.user else "p2"
             if room.owner != request.user and room.opponent != request.user:
                 return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -141,7 +143,7 @@ class MoveView(APIView):
                 room.board = new_board
                 room.new_move = move
                 if winner is not None:
-                    if winner == player:
+                    if winner:
                         room.winner = request.user
                     else:
                         room.winner = room.owner if winner == "p1" else room.opponent 
@@ -218,6 +220,35 @@ class AddBoardView(APIView):
         except Exception as e:
             print(e)
             return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, pk):
+        body = request.data
+        try:
+            layout = body["layout"]
+            name = body["name"]
+            board = BoardLayout.objects.get(pk=pk)
+            if board.owner != request.user:
+                return Response({"error": "not your board to edit"}, status=status.HTTP_400_BAD_REQUEST)
+            if not Game.validate_layout(layout):
+                return Response({"error": "improper board layout"}, status=status.HTTP_400_BAD_REQUEST)
+            if name == "":
+                return Response({"error": "name cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
+            board.layout = layout
+            board.name = name
+            board.save()
+            return Response({"status": "updated"}, status=status.HTTP_201_CREATED)
+        except BoardLayout.DoesNotExist:
+            return Response({"error": "board does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        board = BoardLayout.objects.get(pk=pk)
+        if board.owner != request.user: 
+            return Response({"error": "not your board to delete"}, status=status.HTTP_400_BAD_REQUEST)
+        board.delete()
+        return Response({"status": "deleted"}, status=status.HTTP_201_CREATED)
+
 
 class CreateRoom(APIView):
     authentication_classes = [TokenAuthentication]

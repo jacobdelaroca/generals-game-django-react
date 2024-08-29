@@ -106,7 +106,16 @@ class Game():
             if challenger_piece == 'f' and opponent_piece == 'f':
                 # handle flag v flag
                 return challenger, challenger_piece, challenger_player
-
+            
+            # flag vs special piece
+            if challenger_piece == 'f' or opponent_piece == 'f':
+                if opponent_piece == "f":
+                    print("wiiner challenger")
+                    return challenger, challenger_player, challenger_player
+                if challenger_piece == "f":
+                    print("wiiner challenged")
+                    return opponent, opponent_player, opponent_player
+                
             # spy challenged private or vice versa
             if not challenger_piece == opponent_piece:
                 if challenger_piece == 'p':
