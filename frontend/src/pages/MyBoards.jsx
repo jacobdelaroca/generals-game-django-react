@@ -58,17 +58,19 @@ const MyBoards = () => {
 
 
     return (
-        <div className="flex justify-center w-[60%]">
-            <ul>
+        <div className="flex justify-center">
+            <ul className="grid grid-cols-2 pt-5">
                 {boards.map(board => (<li>
-                    <div className="w-2/3 flex items-center flex-col">
-                        <h1 className="mb-2">
-                          Name: {board.name}
+                    <div className="w-2/3 flex flex-col p-5 border rounded-lg bg-light my-2">
+                        <h1 className="mb-2 text-xl">
+                          {board.name}
 
                         </h1>
                         <BoardPreview board={board.layout} />
-                        <button onClick={ () => deleteBoardHandler(board.id) }>Delete</button>
-                        <button onClick={ () => editBoardHandler(board.layout, board.name, board.id)  }>Edit</button>
+                        <div className="flex flex-row justify-between">
+                          <button className="px-7 mt-2 border rounded-md bg-medium-1" onClick={ () => editBoardHandler(board.layout, board.name, board.id)  }>Edit</button>
+                          <button className="px-7 mt-2 border rounded-md bg-red-400" onClick={ () => deleteBoardHandler(board.id) }>Delete</button>
+                        </div>
                     </div>
                 </li>))}
             </ul>

@@ -224,22 +224,32 @@ const PieceConfigScreen = () => {
 
 
     return (
-      <div>
-        <input type="text" name="name" id="board-name" placeholder="Type here" value={name} onChange={ (e) => setName(e.target.value) }/>
-        <div className="flex flex-row items-center">
+      <>
+      <div className="flex w-4/5 py-3">
+      <h2 className="text-xl">
+        Board Name:
+      </h2>
+        <input className="text-xl mx-4" type="text" name="name" id="board-name" placeholder="Name" value={name} onChange={ (e) => setName(e.target.value) }/>
+
+      </div>
+        <div className="flex flex-col items-center w-4/5">
           {/* <MyContext.Provider>
             <Board cells={ cells } />
             </MyContext.Provider> */}
-          <PieceHolder pieces={piecesInHolder} setPieceToPlace={setPieceToPlace} pieceToPlace={pieceToPlace}/>
-          <div className="w-20"/>
-
+          <div className="w-full">
           <ConfigContext.Provider value={ {onDropHandler, handleCellClick} }>
               <ConfigBoard cells={ cells } dims={ { width: 9, height: 3}} pieces={piecePositions}/>
           </ConfigContext.Provider>
+          </div>
+          <div>
+            <PieceHolder pieces={piecesInHolder} setPieceToPlace={setPieceToPlace} pieceToPlace={pieceToPlace}/>
+          </div>
         </div>
-        <button className="" onClick={ saveBoard }>Save</button>
-        <button className="" onClick={ clearBoard }>Clear</button>
-      </div>
+        <div className="w-4/5 flex flex-row justify-between">
+          <button className="border text-xl bg-medium-2 xl:py-5 my-3 rounded-lg px-20 text-white" onClick={ clearBoard }>Clear</button>
+          <button className="border text-xl bg-medium-2 xl:py-5 my-3 rounded-lg px-20 text-white" onClick={ saveBoard }>Save</button>
+        </div>
+      </>
     )
   }
 
@@ -248,7 +258,7 @@ const PieceConfigScreen = () => {
     return (
         <>
           <div 
-          className={`flex flex-wrap w-[60%]`} 
+          className={`flex flex-wrap w-full`} 
           style={ {  } }>
             { cells.map( (cell, index) => {
               return <ConfigCell position={ cell.position } key={ index } name={pieces[index].piece}/>
@@ -264,7 +274,7 @@ const PieceConfigScreen = () => {
     return (
         <>
         <div 
-        className={`${""} border border-red-300 hover:bg-green-300 aspect-square flex items-center justify-center`} 
+        className={`${""} border border-red-300 hover:bg-medium-1 aspect-square flex items-center justify-center`} 
         onClick={() => handleCellClick(position, name)}
         style={ { width: `${WIDTHPERCENT}%` } }
         onDragOver={ (event) => {

@@ -3,6 +3,7 @@ import Board from "../components/Board"
 import { useContext, useEffect, useState } from "react";
 import { apiUrl, Context, GameContext } from "../constant";
 import BoardPreview from "../components/BoardPreview";
+import ButtonLG from "../components/ButtonLG";
 
 const Game = () => {
     const {credentials} = useContext(Context);
@@ -117,8 +118,12 @@ const Game = () => {
 
     return(
         <div className="w-full flex items-center flex-col">
-            <h1>Room: {roomName}</h1>
             {(!ready && !started) && 
+            <>
+            <div className="flex flex-row justify-between items-center w-3/5 mb-5">
+                <h1 className="text-xl my-4">Room: {roomName}</h1>
+                <ButtonLG text={'Ready'} onClick={ () => readyClicked() } isDisabled={readyButtonEnabled} color={"bg-medium-1"}></ButtonLG>
+            </div>
 			<div className="w-2/3">
                 <ul className="grid grid-cols-2 gap-4">
                     {boards.map((board, index) => (
@@ -126,14 +131,15 @@ const Game = () => {
 							<h3 className="text-xl">
 								{board.name}
 							</h3>
-							<div className={`w-[90%] ${(index === selectedBoard.index) ? "border-green-600 border-4 rounded-lg" : ""}`}>
+							<div className={`w-[90%] cursor-pointer ${(index === selectedBoard.index) ? "border-green-600 border-4 rounded-lg" : ""}`}>
 								<BoardPreview board={board.layout} />
 							</div>
                             </li>
                         ))}
                 </ul>
-                <input type="button" value="Ready" disabled={readyButtonEnabled} onClick={ () => readyClicked() }/> 
-            </div>}
+            </div>
+            </>
+            }
             {ready && <WaitingPanel setStarted={setStarted} roomName={roomName} setMyturn={setMyturn}/>}
             {started && <GamePanel startingTurn={myTurn} roomName={roomName}/>}
         </div>
@@ -172,8 +178,8 @@ const WaitingPanel = ( {setStarted, roomName, setMyturn} ) => {
     }, [])
 
     return (
-        <div>
-            waiting for other player
+        <div className="h-full flex items-center text-3xl">
+            Waiting for other player...
         </div>
     )
 }

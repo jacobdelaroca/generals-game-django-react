@@ -9,11 +9,11 @@ const PieceHolder = ({ pieces, setPieceToPlace, pieceToPlace }) => {
         highlightIndex = Number(holderPos)
     }
     return(
-        <div className="w-[30%] min-h-72: bg-slate-400 flex flex-shrink-0 flex-row flex-wrap items-center justify-center">
+        <div className={`w-full xl:mt-7 ${(pieces.length === 0)? "hidden" : ""} border-2 p-3 flex flex-shrink-0 flex-row flex-wrap items-center justify-center`}>
             {pieces.map((piece, index) => {
                 return <div 
-                className={`${(highlightIndex === index) ? "border-2 border-green-500" : ""} cursor-move aspect-square hover:bg-slate-700 flex-shrink-0 flex items-center justify-center`}
-                style={{width: `${20}%`,}}
+                className={`${(highlightIndex === index) ? "border-green-500" : "border-transparent"} border-2 cursor-move m-1 hover:border-2 hover:border-green-500 box-border flex-shrink-0 flex items-center justify-center`}
+                style={{width: `${10}%`,}}
                 id={`piece-${index}`}
                 key={`piece-${index}`}
                 onClick={ () => {setPieceToPlace(piece.name + " " + String(index))} }
@@ -24,10 +24,9 @@ const PieceHolder = ({ pieces, setPieceToPlace, pieceToPlace }) => {
                 draggable={true}
                 >
                     {/* <h1>{piece.name}</h1> */}
-                    <img src={`${PIECESIMAGES[piece.name]}`} style={{width: "90%"}}/>
+                    <img src={`${PIECESIMAGES[piece.name]}`} draggable={true} style={{width: "100%"}}/>
                 </div>
             })}
-            <div className="aspect-square" style={{width: `${20}%`,}}>&nbsp;</div>
         </div>
     )
 }

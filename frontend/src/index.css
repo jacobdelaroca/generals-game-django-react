@@ -29,4 +29,9 @@ body {
 
 * {
   transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+  box-sizing: border-box;
+}
+
+.active {
+  color: red;
 }
