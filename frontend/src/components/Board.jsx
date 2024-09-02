@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import { GameContext, HEIGHTPERCENT, PIECESIMAGES, WIDTH, WIDTHPERCENT } from "../constant";
+import { GameContext, HEIGHTPERCENT, PIECESIMAGES_BLACK, PIECESIMAGES_WHITE, WIDTH, WIDTHPERCENT } from "../constant";
 
 
 
@@ -48,7 +48,6 @@ function Board({board, move, updateBoard, whichPlayer, turn}) {
 	}
     const pieceToMove = document.getElementById(`piece-${index}`);
     pieceToMove.style.transform = `translate(${xDisp*100}%, ${yDisp * 100}%)`;
-    console.log("turn added in transition: ", myTurn);
     pieceToMove.addEventListener("transitionend", e => {updateBoard(myTurn)});
   }, [move]);
 
@@ -59,10 +58,10 @@ function Board({board, move, updateBoard, whichPlayer, turn}) {
 
     return (
       <>
-        <div className={`flex flex-wrap w-2/3 relative`} style={ {  } }>
+        <div className={`flex flex-wrap w-[45%] relative`} style={ {  } }>
           {/* { parseData(board).map( (piece, index) => { */}
           { board.map( (piece, index) => {
-            return <Cell piece={ {...piece, index} } key={ index }/>
+            return <Cell piece={ {...piece, index} } whichPlayer={whichPlayer} key={ index }/>
           })}
         </div>
       </>
@@ -70,10 +69,11 @@ function Board({board, move, updateBoard, whichPlayer, turn}) {
   }
 
 
-function Cell({piece}) {
+function Cell({piece, whichPlayer}) {
 //   console.log(piece);
 	const color = (piece.index % 2 === 0)? "bg-slate-50" : "bg-slate-600"; 
-	return (
+	const isPlayerPiece = piece.piece.split(" ")[1] === whichPlayer;
+  return (
 		<div 
 			className={`${(piece.color === "")? "" : piece.color} border border-red-300 hover:bg-slate-800 aspect-square relative`} 
 			style={{width: `${100/9}%`}} 
@@ -95,9 +95,15 @@ function Cell({piece}) {
       id={`piece-${piece.index}`}
       onTransitionEnd={() => {}} // add shit here
       >
-      {(piece.piece.length > 2) && <img src={`${PIECESIMAGES[`${piece.piece.split(" ")[0]}`]}`}/>}
+      {(piece.piece.length > 2) ? 
+        (isPlayerPiece) ? 
+          <img className="border border-black" src={`${PIECESIMAGES_BLACK[`${piece.piece.split(" ")[0]}`]}`}/>
+          : 
+          <img className="border border-black" src={`${PIECESIMAGES_WHITE[`${piece.piece.split(" ")[0]}`]}`}/> 
+        : ""
+        }
       {/* {(piece.piece.length > 2) && piece.piece.split(" ")[0]} */}
-      {(piece.piece.length === 2) && <img src={`https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/GotG-flagW.svg/1920px-GotG-flagW.svg.png`}/>}
+      {(piece.piece.length === 2) && <img className="border border-black" src={`https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/GotG-flagW.svg/1920px-GotG-flagW.svg.png`}/>}
       {/* {(piece.piece !== " ") && <div className="h-10 rounded-full bg-red-200 piece block aspect-square">{piece.piece}</div>} */}
       </div>
 

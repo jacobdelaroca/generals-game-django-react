@@ -59,7 +59,8 @@ const MyBoards = () => {
 
     return (
         <div className="flex justify-center">
-            <ul className="grid grid-cols-2 pt-5">
+          {(boards.length === 0) && <h2 className="text-2xl m-6">You have no boards yet. Create one.</h2>}
+            {(boards.length !== 0) && <ul className="grid grid-cols-2 pt-5">
                 {boards.map(board => (<li>
                     <div className="w-2/3 flex flex-col p-5 border rounded-lg bg-light my-2">
                         <h1 className="mb-2 text-xl">
@@ -73,7 +74,7 @@ const MyBoards = () => {
                         </div>
                     </div>
                 </li>))}
-            </ul>
+            </ul>}
         </div>
     )
 } 

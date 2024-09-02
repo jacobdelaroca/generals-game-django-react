@@ -1,4 +1,4 @@
-import { PIECESIMAGES, WIDTH } from "../constant"
+import { PIECESIMAGES_BLACK, WIDTH } from "../constant"
 
 const PieceHolder = ({ pieces, setPieceToPlace, pieceToPlace }) => {
     let highlightIndex = -1;
@@ -24,7 +24,7 @@ const PieceHolder = ({ pieces, setPieceToPlace, pieceToPlace }) => {
                 draggable={true}
                 >
                     {/* <h1>{piece.name}</h1> */}
-                    <img src={`${PIECESIMAGES[piece.name]}`} draggable={true} style={{width: "100%"}}/>
+                    <img src={`${PIECESIMAGES_BLACK[piece.name]}`} draggable={true} style={{width: "100%"}}/>
                 </div>
             })}
         </div>

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useContext } from "react";
-import { WIDTH, PIECES, ConfigContext, apiUrl, Context, PIECESIMAGES, WIDTHPERCENT } from "../constant";
+import { WIDTH, PIECES, ConfigContext, apiUrl, Context, PIECESIMAGES_BLACK, WIDTHPERCENT } from "../constant";
 import PieceHolder from "../components/PieceHolder";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -181,7 +181,7 @@ const PieceConfigScreen = () => {
         }
         // console.log("Response Data:", data);
         clearBoard();
-        alert("updated");
+        alert("created");
         navigate("/layout/boards");
       }) // Log response data
       .catch(error => {console.error('Fetch error:', error); alert(error);}); // Handle errors
@@ -287,7 +287,7 @@ const PieceConfigScreen = () => {
         <p className="h-0 w-0">&nbsp;</p>
             {/* {position} */}
         {/* <div className="text-l flex justify-center">{(name === null)? "": <img src={`${PIECESIMAGES[name]}`} className="w-[90%]" />}</div> */}
-        {(name === null)? "": <img src={`${PIECESIMAGES[name]}`} className="w-[90%]" />}
+        {(name === null)? "": <img src={`${PIECESIMAGES_BLACK[name]}`} className="w-[90%]" />}
         </div>
         </>
     )

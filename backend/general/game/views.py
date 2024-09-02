@@ -64,11 +64,15 @@ class GetUpdate(APIView):
             intent = request.GET.get("intent", "")
             room = GameRoom.objects.get(room_name=room_name)
             winner = None
+            player = "p1" if room.owner == request.user else "p2"
+            board = None
             if room.winner is not None:
+                board = room.board
                 winner = room.winner == request.user
                 print("update requester is winner: ", room.winner == request.user)
+            else:
+                board = room.prep_board_before_sending(player=player)
             
-            player = "p1" if room.owner == request.user else "p2"
             if room.owner != request.user and room.opponent != request.user:
                 return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
             
@@ -79,18 +83,15 @@ class GetUpdate(APIView):
                 else:
                     return Response({"started": False}, status=status.HTTP_200_OK)
             elif intent == TURN_UPDATE:
-                print("update winner", winner)
                 is_player_turn = room.turn == request.user
                 if is_player_turn:
-                    return Response({"turn": is_player_turn, "winner": winner, "board": room.prep_board_before_sending(player), "move": room.new_move}, status=status.HTTP_200_OK)    
+                    return Response({"turn": is_player_turn, "winner": winner, "board": board, "move": room.new_move}, status=status.HTTP_200_OK)    
                 else:
                     return Response({"turn": is_player_turn, "winner": winner}, status=status.HTTP_200_OK)    
             elif intent == ISRESUME:
                 return Response({"resume": room.host_ready and room.opponent_ready}, status=status.HTTP_200_OK)
             elif intent == INITIAL:
-                preped_board = room.prep_board_before_sending(player)
-                return Response({"turn": room.turn == request.user, "player": player, "board": preped_board}, status=status.HTTP_200_OK)    
-
+                return Response({"turn": room.turn == request.user, "player": player, "board": board}, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "nor found"}, status=status.HTTP_404_NOT_FOUND)
         except GameRoom.DoesNotExist:
@@ -132,7 +133,7 @@ class MoveView(APIView):
                     
             new_board, move, result, winner, flag_in_place = Game.move(room.board, player, move)
             print("return from move, flag in position: ", flag_in_place)
-            if winner is not None: winner = winner == player
+            board = None
             if new_board is not None:
                 if room.turn == room.owner:
                     room.owner_flag_in_place = flag_in_place
@@ -143,18 +144,21 @@ class MoveView(APIView):
                 room.board = new_board
                 room.new_move = move
                 if winner is not None:
+                    winner = winner == player
                     if winner:
                         room.winner = request.user
                     else:
                         room.winner = room.owner if winner == "p1" else room.opponent 
+                    board = room.board
+                else:
+                    # return board without hrevealing opponent position
+                    board = room.prep_board_before_sending(player)
                 room.save()
             else:
                 print("here")
                 return Response({"board": new_board, "move": move}, status=status.HTTP_400_BAD_REQUEST)
-            # return board without hrevealing opponent position
-            board_copy = room.prep_board_before_sending(player)
             print("winner", winner)
-            return Response({"board": board_copy, "move": move, "result": result, "turn": room.turn == request.user, "winner":winner}, status=status.HTTP_202_ACCEPTED)
+            return Response({"board": board, "move": move, "result": result, "turn": room.turn == request.user, "winner":winner}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             traceback.print_exc()
             print("here")
@@ -285,7 +289,7 @@ class SignupView(APIView):
             new_room = GameRoom(owner=user)
             new_room.save()
             return Response({"token": token.key}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 class LoginView(APIView):
     def post(self, request):

@@ -1,4 +1,4 @@
-import { PIECESIMAGES, WIDTHPERCENT } from "../constant";
+import { PIECESIMAGES_BLACK, WIDTHPERCENT } from "../constant";
 
 const BoardPreview = ({board}) => {
     return (
@@ -9,7 +9,7 @@ const BoardPreview = ({board}) => {
                     className={`aspect-square flex items-center justify-center border border-red-300`}
                     style={{width: `${WIDTHPERCENT}%`}}
                 >
-                    {(cell !== " ") && <img src={`${PIECESIMAGES[cell]}`} className="w-[90%]"/>}
+                    {(cell !== " ") && <img src={`${PIECESIMAGES_BLACK[cell]}`} className="w-[90%]"/>}
                     <p className="h-0 w-0">&nbsp;</p>
                 </div>
             ))}

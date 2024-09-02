@@ -117,7 +117,7 @@ const Game = () => {
     }
 
     return(
-        <div className="w-full flex items-center flex-col">
+        <div className="w-full h-full flex items-center flex-col">
             {(!ready && !started) && 
             <>
             <div className="flex flex-row justify-between items-center w-3/5 mb-5">
@@ -279,7 +279,9 @@ export const GamePanel = ({roomName}) => {
                 } else {
                     alert("you lost");
                 }
-                navigate("/");
+                setMyturn(true);
+                setMove(data.move);
+                setNewBoard(data.board);
                 return;
             }
 			setMyturn(data.turn);
@@ -353,12 +355,15 @@ export const GamePanel = ({roomName}) => {
                     }
                     console.log("Response Data:", data);
                     if(data.winner !== null){
+                        console.log("winner: ", data.winner);
                         if(data.winner){
                             alert("you won");
                         } else {
                             alert("you lost");
                         }
-                        navigate("/");
+                        setMyturn(true);
+                        setMove(data.move);
+                        setNewBoard(data.board);
                         return;
                     }
 					if(data.turn){
@@ -378,7 +383,7 @@ export const GamePanel = ({roomName}) => {
             }, 1000);
         } else {
 			console.log("useEffect update", myTurn);
-			updateBoard(myTurn);
+			// updateBoard(myTurn);
 		}
         return () => {
             if(intervalId){
@@ -389,16 +394,20 @@ export const GamePanel = ({roomName}) => {
     
     return (
 		<GameContext.Provider value={{myTurn}}>
-        <div>
-            <Board 
-			turn={myTurn}
-			board={board} 
-			move={move} 
-			updateBoard={updateBoard}
-			whichPlayer={whichPlayer}
-			/>
-        </div>
-
+            <div className="flex flex-row w-full justify-center my-6">
+                <div className="flex flex-col mr-6">
+                    <h2 className="text-2xl mb-2">Room: {roomName}</h2>
+                    <h2 className="text-2xl mb-2">Turn: {(myTurn)? "Your Turn" : "Opponent's Turn"}</h2>
+                    <ButtonLG text={"Surrender"} color={"bg-red-200"}/>
+                </div>
+                <Board 
+                turn={myTurn}
+                board={board} 
+                move={move} 
+                updateBoard={updateBoard}
+                whichPlayer={whichPlayer}
+                />
+            </div>
 		</GameContext.Provider>
     )
 }
