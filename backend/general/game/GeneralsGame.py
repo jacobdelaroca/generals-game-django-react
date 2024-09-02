@@ -73,6 +73,8 @@ class Game():
         winner = None
         flag_in_place = False
 
+        opponent_piece = None
+
         # move into empty square
         if board[to_x][to_y] == ' ':
             piece_name, piece_player = piece.split(' ')
@@ -94,7 +96,7 @@ class Game():
         
         pprint(board)
 
-        return board, move, result, winner, flag_in_place
+        return board, move, result, winner, flag_in_place, opponent_piece
 
     @staticmethod
     def judge(challenger, opponent):
@@ -110,10 +112,8 @@ class Game():
             # flag vs special piece
             if challenger_piece == 'f' or opponent_piece == 'f':
                 if opponent_piece == "f":
-                    print("wiiner challenger")
                     return challenger, challenger_player, challenger_player
                 if challenger_piece == "f":
-                    print("wiiner challenged")
                     return opponent, opponent_player, opponent_player
                 
             # spy challenged private or vice versa

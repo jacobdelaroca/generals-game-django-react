@@ -84,6 +84,8 @@ class GetUpdate(APIView):
                     return Response({"started": False}, status=status.HTTP_200_OK)
             elif intent == TURN_UPDATE:
                 is_player_turn = room.turn == request.user
+                if winner is not None:
+                    return Response({"turn": is_player_turn, "winner": winner, "board": room.board, "move": room.new_move}, status=status.HTTP_200_OK)
                 if is_player_turn:
                     return Response({"turn": is_player_turn, "winner": winner, "board": board, "move": room.new_move}, status=status.HTTP_200_OK)    
                 else:
@@ -118,21 +120,22 @@ class MoveView(APIView):
 
             player = "p1" if room.owner == request.user else "p2"
 
+            # move the pieces        
+            new_board, move, result, winner, flag_in_place, opponent_piece = Game.move(room.board, player, move)
+            
             if room.owner == request.user:
                 if room.opponent_flag_in_place:
-                    print("confirmed in place")
-                    room.winner = room.opponent
-                    room.save()
-                    return Response({"board": [], "move": [], "result": [], "turn": room.turn == request.user, "winner":False}, status=status.HTTP_202_ACCEPTED)
+                    if opponent_piece is None or opponent_piece.split(" ")[0] != "f":
+                        room.winner = room.opponent
+                        room.save()
+                        return Response({"board": new_board, "move": move, "result": result, "turn": room.turn == request.user, "winner":False}, status=status.HTTP_202_ACCEPTED)
             else:
                 if room.owner_flag_in_place:
-                    print("confirmed in place")
-                    room.winner = room.owner
-                    room.save()
-                    return Response({"board": [], "move": [], "result": [], "turn": room.turn == request.user, "winner":False}, status=status.HTTP_202_ACCEPTED)
-                    
-            new_board, move, result, winner, flag_in_place = Game.move(room.board, player, move)
-            print("return from move, flag in position: ", flag_in_place)
+                    if opponent_piece is None or opponent_piece.split(" ")[0] != "f":
+                        room.winner = room.owner
+                        room.save()
+                        return Response({"board": new_board, "move": move, "result": result, "turn": room.turn == request.user, "winner":False}, status=status.HTTP_202_ACCEPTED)
+            
             board = None
             if new_board is not None:
                 if room.turn == room.owner:
@@ -155,9 +158,7 @@ class MoveView(APIView):
                     board = room.prep_board_before_sending(player)
                 room.save()
             else:
-                print("here")
                 return Response({"board": new_board, "move": move}, status=status.HTTP_400_BAD_REQUEST)
-            print("winner", winner)
             return Response({"board": board, "move": move, "result": result, "turn": room.turn == request.user, "winner":winner}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             traceback.print_exc()
