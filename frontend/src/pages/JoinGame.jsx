@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { apiUrl, Context } from "../constant";
 import { useNavigate } from "react-router-dom";
 import ButtonLG from "../components/ButtonLG";
+import LoginCallOut from "../components/LoginCallOut";
 
 const JoinGame = () => {
     const {credentials} = useContext(Context);
@@ -105,9 +106,9 @@ const JoinGame = () => {
         <>
         {(boardNum === 0) && <h2>You have no boards to use. Please Create one first.</h2>}
         {(boardNum !== 0) &&
-            <div className=" w-full h-full flex justify-center items-center">
-                {(credentials.user === '') && <h1>Login first</h1>}
-                {(credentials.user !== '') && <div className="xl:w-1/3 xl:p-10 rounded-xl flex flex-col items-center border bg-light">
+            <div className="w-full h-full flex justify-center items-center">
+                {(credentials.user === '') && <LoginCallOut />}
+                {(credentials.user !== '') && <div className="xl:w-1/3 xl:p-10 rounded-xl flex flex-col items-center border bg-white shadow-lg p-12">
                     <p className="text-xl xl:mt-4">Enter the name of the room you want to join:</p>
                     <form onSubmit={handleJoinOnclick} className="xl:w-1/2 xl:h-1/2 xl:mb-7 flex flex-col items-center">
                         <input className="xl:h-10 xl:w-full border m-2 p-1 text-center rounded-lg xl:mb-2" placeholder="Room Name" type="text" name="room-name" id="room-name-input" value={roomName} onChange={(e) => setRoomName(e.target.value)} />

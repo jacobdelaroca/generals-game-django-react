@@ -2,10 +2,15 @@ import { useContext, useEffect, useState } from "react"
 import { apiUrl, Context } from "../constant"
 import BoardPreview from "../components/BoardPreview";
 import { useNavigate } from "react-router-dom";
+import ButtonLG from "../components/ButtonLG";
+import ButtonMD from "../components/ButtonMD";
+import PaginationNav from "../components/PaginationNav";
+import HRDivider from "../components/HRDivider";
 
 const MyBoards = () => {
     const {credentials} = useContext(Context);
     const [boards, setBoards] = useState([]);
+    const [boardsShown, setBoardsShown] = useState([]);
     const navigate = useNavigate();
 
 
@@ -58,19 +63,23 @@ const MyBoards = () => {
 
 
     return (
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-4 flex-col items-center">
           {(boards.length === 0) && <h2 className="text-2xl m-6">You have no boards yet. Create one.</h2>}
-            {(boards.length !== 0) && <ul className="grid grid-cols-2 pt-5">
-                {boards.map(board => (<li>
-                    <div className="w-2/3 flex flex-col p-5 border rounded-lg bg-light my-2">
-                        <h1 className="mb-2 text-xl">
+            <PaginationNav items={boards} itemsPerPage={6} setItemsShown={setBoardsShown}/>
+            {(boards.length !== 0) && 
+            <ul className="w-11/12 gap-4 grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 grid-cols-1 pt-5">
+                {boardsShown.map(board => (<li>
+                    <div key={board.id} className="w-[100%] bg-white flex flex-col p-5 drop-shadow-md rounded-lg border-medium-1">
+                        <h1 className="mb-2 text-2xl">
                           {board.name}
 
                         </h1>
                         <BoardPreview board={board.layout} />
-                        <div className="flex flex-row justify-between">
-                          <button className="px-7 mt-2 border rounded-md bg-medium-1" onClick={ () => editBoardHandler(board.layout, board.name, board.id)  }>Edit</button>
-                          <button className="px-7 mt-2 border rounded-md bg-red-400" onClick={ () => deleteBoardHandler(board.id) }>Delete</button>
+                        <div className="flex flex-col items-center justify-between pt-4">
+                          <ButtonMD customWidth={"w-4/5"} text={"Edit"} color={"bg-medium-1"} onClick={ () => editBoardHandler(board.layout, board.name, board.id) }></ButtonMD>
+                          <ButtonMD customWidth={"w-4/5"} text={"Delete"} color={"bg-red-500"} onClick={ () => deleteBoardHandler(board.id) }></ButtonMD>
+                          {/* <button className="px-7 mt-2 border rounded-md bg-medium-1" onClick={ () => editBoardHandler(board.layout, board.name, board.id)  }>Edit</button>
+                          <button className="px-7 mt-2 border rounded-md bg-red-400" onClick={ () => deleteBoardHandler(board.id) }>Delete</button> */}
                         </div>
                     </div>
                 </li>))}

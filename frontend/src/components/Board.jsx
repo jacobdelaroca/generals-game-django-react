@@ -31,6 +31,11 @@ function Board({board, move, updateBoard, whichPlayer, turn}) {
             });
       return;
     } 
+    // surrendered
+    if(move === true){
+      updateBoard(false);
+      return;
+    } 
     // convert 2d position to 1d position jesus fuck why
     let index;
 	let yDisp
@@ -58,7 +63,7 @@ function Board({board, move, updateBoard, whichPlayer, turn}) {
 
     return (
       <>
-        <div className={`flex flex-wrap w-[45%] relative`} style={ {  } }>
+        <div className={`flex flex-wrap relative`} style={ {  } }>
           {/* { parseData(board).map( (piece, index) => { */}
           { board.map( (piece, index) => {
             return <Cell piece={ {...piece, index} } whichPlayer={whichPlayer} key={ index }/>

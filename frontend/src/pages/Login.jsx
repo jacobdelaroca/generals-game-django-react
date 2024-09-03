@@ -8,6 +8,8 @@ const Login = () => {
 
     const [username, setUsername] = useState('test1');
     const [password, setPassword] = useState('test');
+    const [newPassword, setNewPassword] = useState('test');
+    const [newUsername, setNewUsername] = useState('test1');
     const [confirmPassword, setConfirmPassword] = useState('test');
     const { setCredentials } = useContext(Context);
     const navigate = useNavigate()
@@ -35,7 +37,7 @@ const Login = () => {
     }
 
     const handleSignUp = () => {
-        if(password !== confirmPassword){
+        if(newPassword !== confirmPassword){
             alert("password must match");
             return;
         } else {
@@ -64,20 +66,20 @@ const Login = () => {
     }
 
     return (
-        <div className="w-1/3 rounded-lg bg-light mx-auto my-auto py-6 flex flex-col items-center justify-center">
+        <div className="w-1/3 rounded-lg bg-white shadow-lg mx-auto my-auto py-6 flex flex-col items-center justify-center">
             <h2 className="text-xl">Login</h2>
             <div className="flex py-6 w-2/5 flex-col items-center justify-center">
-                <input onChange={(e) => {setUsername(e.target.value)}} value={username} className='my-3 w-full h-10 rounded px-1' type="text" placeholder="Username"></input>
-                <input onChange={(e) => {setPassword(e.target.value)}} value={password} className='my-3 w-full h-10 rounded px-1' type="text" placeholder="Password"></input>
+                <input onChange={(e) => {setUsername(e.target.value)}} value={username} className='border-2 my-3 w-full h-10 rounded px-1' type="text" placeholder="Username"></input>
+                <input onChange={(e) => {setPassword(e.target.value)}} value={password} className='border-2 my-3 w-full h-10 rounded px-1' type="text" placeholder="Password"></input>
                 
                 <ButtonLG color={"bg-medium-1"} text={"Login"} customWidth={"w-full"} onClick={handleSubmit}/>
             </div>
             <h2 className="text-xl">Sign Up</h2>
 
             <div className="flex py-6 w-2/5 flex-col items-center justify-center">
-                <input onChange={(e) => {setUsername(e.target.value)}} value={username} className='my-3 w-full h-10 rounded px-1' type="text" placeholder="Username"></input>
-                <input onChange={(e) => {setPassword(e.target.value)}} value={password} className='my-3 w-full h-10 rounded px-1' type="text" placeholder="Password"></input>
-                <input onChange={(e) => {setConfirmPassword(e.target.value)}} value={confirmPassword} className='my-3 w-full h-10 rounded px-1' type="text" placeholder="Confirm Password"></input>
+                <input onChange={(e) => {setNewUsername(e.target.value)}} value={newUsername} className='border-2 my-3 w-full h-10 rounded px-1' type="text" placeholder="Username"></input>
+                <input onChange={(e) => {setNewPassword(e.target.value)}} value={newPassword} className='border-2 my-3 w-full h-10 rounded px-1' type="text" placeholder="Password"></input>
+                <input onChange={(e) => {setConfirmPassword(e.target.value)}} value={confirmPassword} className='border-2 my-3 w-full h-10 rounded px-1' type="text" placeholder="Confirm Password"></input>
                 
                 <ButtonLG color={"bg-medium-1"} text={"Sign Up"} customWidth={"w-full"} onClick={handleSignUp}/>
             </div>

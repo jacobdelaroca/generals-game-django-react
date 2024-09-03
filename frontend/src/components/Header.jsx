@@ -7,16 +7,16 @@ const Header = () => {
     const { credentials } = useContext(Context);
     const navItems = [
         {
-            name: "Home",
-            link: "/"
+            name: "Play",
+            link: "join"
         },
         {
             name: "Boards",
             link: "layout/boards"
         },
         {
-            name: "Play",
-            link: "join"
+            name: "Home",
+            link: "/"
         },
         // {
         //     name: `${credentials.user}`,
@@ -24,14 +24,15 @@ const Header = () => {
         // },
     ]
     return (
-        <div className="w-full h-screen flex flex-col">
-            <nav className="flex flex-none flex-row h-16 items-center justify-end p-9 bg-dark w-full">
+        <div className="w-full h-screen flex flex-col bg-gray-100">
+            <nav className="bg-dark w-full">
+                {(credentials.user === "") && <NavLink className='float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white' to={'login'} key={"login key"}>Login</NavLink>}
                 {navItems.map((item, index) => (
-                    <NavLink className='px-4 flex items-center h-16 text-2xl hover:text-black hover:bg-light text-white' to={item.link} key={item.name + index.toString()}>{item.name}</NavLink>
+                    <NavLink className='float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white' to={item.link} key={item.name + index.toString()}>{item.name}</NavLink>
                 ))}
-                {(credentials.user === "") && <NavLink className='px-4 text-2xl hover:text-red-500' to={'login'} key={"login key"}>Login</NavLink>}
             </nav>
-            <main className="flex flex-grow">
+            <main 
+            className="background flex flex-grow">
                 <Outlet />
             </main>
         </div>

@@ -157,6 +157,7 @@ const PieceConfigScreen = () => {
           }
         }) // Log response data
         .catch(error => console.error('Fetch error:', error)); // Handle errors
+        return;
       }
       
       
@@ -232,7 +233,7 @@ const PieceConfigScreen = () => {
         <input className="text-xl mx-4" type="text" name="name" id="board-name" placeholder="Name" value={name} onChange={ (e) => setName(e.target.value) }/>
 
       </div>
-        <div className="flex flex-col items-center w-4/5">
+        <div className="bg-white p-2 rounded-md shadow-lg flex flex-col items-center w-4/5">
           {/* <MyContext.Provider>
             <Board cells={ cells } />
             </MyContext.Provider> */}
@@ -276,7 +277,7 @@ const PieceConfigScreen = () => {
         <div 
         className={`${""} border border-red-300 hover:bg-medium-1 aspect-square flex items-center justify-center`} 
         onClick={() => handleCellClick(position, name)}
-        style={ { width: `${WIDTHPERCENT}%` } }
+        style={ { width: `${WIDTHPERCENT}%`, boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset" } }
         onDragOver={ (event) => {
             event.preventDefault();
         } }

@@ -9,7 +9,9 @@ const PieceHolder = ({ pieces, setPieceToPlace, pieceToPlace }) => {
         highlightIndex = Number(holderPos)
     }
     return(
-        <div className={`w-full xl:mt-7 ${(pieces.length === 0)? "hidden" : ""} border-2 p-3 flex flex-shrink-0 flex-row flex-wrap items-center justify-center`}>
+        <div 
+        style={{boxShadow: "rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset"}} 
+        className={`w-full xl:mt-7 ${(pieces.length === 0)? "hidden" : ""} border-2 p-3 flex flex-shrink-0 flex-row flex-wrap items-center justify-center`}>
             {pieces.map((piece, index) => {
                 return <div 
                 className={`${(highlightIndex === index) ? "border-green-500" : "border-transparent"} border-2 cursor-move m-1 hover:border-2 hover:border-green-500 box-border flex-shrink-0 flex items-center justify-center`}

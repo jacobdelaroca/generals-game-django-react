@@ -4,6 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import { apiUrl, Context, GameContext } from "../constant";
 import BoardPreview from "../components/BoardPreview";
 import ButtonLG from "../components/ButtonLG";
+import PaginationNav from "../components/PaginationNav";
+import HRDivider from "../components/HRDivider";
 
 const Game = () => {
     const {credentials} = useContext(Context);
@@ -11,8 +13,9 @@ const Game = () => {
     const [ready, setReady] = useState(false);
     const [started, setStarted] = useState(false);
     const [myTurn, setMyturn] = useState(false);
-    const [readyButtonEnabled, setReadyButtonEnabled] = useState(true);
+    const [readyButtonDisabled, setReadyButtonDisabled] = useState(true);
     const [selectedBoard, setSelectedBoard] = useState({index: -1});
+    const [boardsShown, setBoardsShown] = useState([]);
     const location = useLocation();
     const { roomName } = useParams();
     const {host} = location.state || {};
@@ -81,13 +84,13 @@ const Game = () => {
 
     const selectBoard = (board, index) => {
         setSelectedBoard({...board, index});
-        setReadyButtonEnabled(false);
+        setReadyButtonDisabled(false);
     };
 
     const readyClicked = () => {
         console.log("ready"); 
         setReady(true);
-        setReadyButtonEnabled(false);
+        setReadyButtonDisabled(false);
         fetch(apiUrl + "game/ready/", {
             method: "POST", // HTTP method
             headers: {
@@ -120,18 +123,20 @@ const Game = () => {
         <div className="w-full h-full flex items-center flex-col">
             {(!ready && !started) && 
             <>
-            <div className="flex flex-row justify-between items-center w-3/5 mb-5">
-                <h1 className="text-xl my-4">Room: {roomName}</h1>
-                <ButtonLG text={'Ready'} onClick={ () => readyClicked() } isDisabled={readyButtonEnabled} color={"bg-medium-1"}></ButtonLG>
+            <div className="flex flex-row justify-between items-center w-3/5">
+                <h1 className="text-xl my-2">Room: {roomName}</h1>
+                <ButtonLG text={'Ready'} onClick={ () => readyClicked() } isDisabled={readyButtonDisabled} color={"bg-medium-1"}></ButtonLG>
             </div>
-			<div className="w-2/3">
+			<div className="w-2/3 flex flex-col items-center">
+                    <PaginationNav onChange={() => {setSelectedBoard({index: -1}); setReadyButtonDisabled(true)}} items={boards} itemsPerPage={6} setItemsShown={setBoardsShown}/>
                 <ul className="grid grid-cols-2 gap-4">
-                    {boards.map((board, index) => (
-                        <li className="flex flex-col items-center" key={index} onClick={() => {selectBoard(board, index)}}>
-							<h3 className="text-xl">
+                    {boardsShown.map((board, index) => (
+                        <li className={`flex flex-col items-center bg-white rounded-md shadow-lg ${(index === selectedBoard.index) ? "border-green-600 border-4 rounded-lg" : ""}`} key={index} onClick={() => {selectBoard(board, index)}}>
+							<h3 className="text-xl mt-2">
 								{board.name}
 							</h3>
-							<div className={`w-[90%] cursor-pointer ${(index === selectedBoard.index) ? "border-green-600 border-4 rounded-lg" : ""}`}>
+                            {/* <HRDivider width={"50%"} my={"my-1"} /> */}
+							<div className={`w-[80%] m-1 cursor-pointer `}>
 								<BoardPreview board={board.layout} />
 							</div>
                             </li>
@@ -191,7 +196,8 @@ export const GamePanel = ({roomName}) => {
     const [board, setBoard] = useState([]);
     const [newBoard, setNewBoard] = useState([]);
     const [move, setMove] = useState(null);
-	const [whichPlayer, setWhichPlayer] = useState("");
+	const [whichPlayer, setWhichPlayer] = useState("");    
+    const [gameOver, setGameOver] = useState(false);
     const navigate = useNavigate();
 
 
@@ -212,7 +218,7 @@ export const GamePanel = ({roomName}) => {
 		parsedData = parsedData.map((cell, index) => ({
 			...cell, 
 			onClick: 
-				(cell.piece.length > 2 && turn) ? 
+				(cell.piece.length > 2 && turn && (gameOver !== true)) ? 
 					showAvailableMoves : () => {},
 			color: ""
 				}));
@@ -246,7 +252,50 @@ export const GamePanel = ({roomName}) => {
 				color: ''
 					}))
 		))
-	} 
+	}
+    
+    const surrender = () => {
+        fetch(apiUrl + `game/surrender/`, {
+			method: "POST", // HTTP method
+			headers: {
+				"Authorization": "Token " + credentials.token,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				"room_name": roomName,
+			})
+		})
+		.then(response => {
+			console.log("Response Status:", response.status); // Log status code
+			return response.json()
+		})
+		.then(data => {
+            if(data.error){
+                throw new Error(data.error)
+            }
+			console.log("Response Data:", data);
+			console.log("turn: ", myTurn);
+            if(data.winner !== null){
+                console.log("winner", data.winner);
+                if(data.winner){
+                    alert("you won");
+                } else {
+                    alert("you lost");
+                }
+                setNewBoard(b => data.board);
+                setMove(true);
+                setMyturn(true);
+                setGameOver(true);
+                return;
+            }
+		}) 
+		.catch(error => {
+            console.error('Fetch error:', error)
+            alert(error);
+            navigate('/');
+        });
+        updateBoard(true);
+    }
 
 	const moveHere = (cell, from) => {
 		const move = [from, [cell.position.x, cell.position.y]];
@@ -280,6 +329,7 @@ export const GamePanel = ({roomName}) => {
                     alert("you lost");
                 }
                 setMyturn(true);
+                setGameOver(true);
                 setMove(data.move);
                 setNewBoard(data.board);
                 return;
@@ -327,6 +377,7 @@ export const GamePanel = ({roomName}) => {
 
     const updateBoard = (turn) => {
 		console.log('myTurn whe updated', turn);
+		console.log('newBoard whe updated', newBoard);
 		if(whichPlayer === "p2"){
 			setBoard(d => parseData(newBoard, turn).reverse());
 		} else {
@@ -362,6 +413,7 @@ export const GamePanel = ({roomName}) => {
                             alert("you lost");
                         }
                         setMyturn(true);
+                        setGameOver(true);
                         setMove(data.move);
                         setNewBoard(data.board);
                         return;
@@ -383,8 +435,10 @@ export const GamePanel = ({roomName}) => {
             }, 1000);
         } else {
 			console.log("useEffect update", myTurn);
-			// updateBoard(myTurn);
-		}
+            if(intervalId){
+                clearInterval(intervalId);
+            }
+        }
         return () => {
             if(intervalId){
                 clearInterval(intervalId);
@@ -394,12 +448,22 @@ export const GamePanel = ({roomName}) => {
     
     return (
 		<GameContext.Provider value={{myTurn}}>
-            <div className="flex flex-row w-full justify-center my-6">
-                <div className="flex flex-col mr-6">
+            <div className="flex p-4 my-6 xl:w-[60%] lg:[75%] md:w-[80%] rounded-lg shadow-lg bg-white">
+                <div className="flex flex-col">
                     <h2 className="text-2xl mb-2">Room: {roomName}</h2>
                     <h2 className="text-2xl mb-2">Turn: {(myTurn)? "Your Turn" : "Opponent's Turn"}</h2>
-                    <ButtonLG text={"Surrender"} color={"bg-red-200"}/>
+                    <HRDivider width={"95%"} my={"my-2 mx-auto"}/>
+                    <ButtonLG text={"Surrender"} onClick={surrender} color={"bg-red-200"}/>
+                    {gameOver &&
+                    <>
+                    <h2 className="text-2xl mb-2">Game Over</h2>
+                    <ButtonLG text={"Play Again"} onClick={() => {navigate("/join")}} color={"bg-medium-1"}/>
+                    <ButtonLG text={"Home"} onClick={() => {navigate("/")}} color={"bg-medium-1"}/>
+                    </>
+                    
+                    }
                 </div>
+                <div className="border mx-4"></div>
                 <Board 
                 turn={myTurn}
                 board={board} 
