@@ -82,6 +82,7 @@ const PieceConfigScreen = () => {
             return;
         }
         const data = event.dataTransfer.getData("text/plain").split(" ");
+        if(data.length !== 2) return;
         const pieceName = data[0];
         const holderPos = data[1];
         const newPieceInHolder = piecesInHolder.filter((p, index) => index !== Number(holderPos));
@@ -277,7 +278,7 @@ const PieceConfigScreen = () => {
         <div 
         className={`${""} border border-red-300 hover:bg-medium-1 aspect-square flex items-center justify-center`} 
         onClick={() => handleCellClick(position, name)}
-        style={ { width: `${WIDTHPERCENT}%`, boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset" } }
+        style={ { width: `${WIDTHPERCENT}%` } }
         onDragOver={ (event) => {
             event.preventDefault();
         } }

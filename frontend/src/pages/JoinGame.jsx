@@ -104,7 +104,8 @@ const JoinGame = () => {
     
     return(
         <>
-        {(boardNum === 0) && <h2>You have no boards to use. Please Create one first.</h2>}
+        {(credentials.user === '') && <LoginCallOut />}
+        {(boardNum === 0 && credentials.user !== '') && <h2>You have no boards to use. Please Create one first.</h2>}
         {(boardNum !== 0) &&
             <div className="w-full h-full flex justify-center items-center">
                 {(credentials.user === '') && <LoginCallOut />}

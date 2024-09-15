@@ -6,7 +6,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from .serializers import UserSerializer, BoardSerializer
 from .models import GameRoom, BoardLayout
@@ -15,6 +15,8 @@ from .GeneralsGame import Game
 from django.contrib.auth import authenticate, login
 import traceback
 import copy
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 # intents
@@ -102,6 +104,19 @@ class GetUpdate(APIView):
             # traceback.print_exc()
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class SurrenderView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        body = request.data
+        try:
+            room_name = body["room_name"]
+            room = GameRoom.objects.get(room_name=room_name)
+            room.winner = room.owner if request.user == room.opponent else room.opponent
+            room.save()
+            return Response({"board": room.board, "move": None, "result": None, "turn": room.turn == False, "winner":False}, status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MoveView(APIView):
@@ -289,14 +304,19 @@ class SignupView(APIView):
             token = Token.objects.create(user=user)
             new_room = GameRoom(owner=user)
             new_room.save()
+            print("created")
             return Response({"token": token.key}, status=status.HTTP_201_CREATED)
         return Response({"error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
+@method_decorator(csrf_exempt, name='dispatch')    
 class LoginView(APIView):
     def post(self, request):
         user = get_object_or_404(User, username=request.data['username'])
+        print(user.username)
+        print(request.data['password'])
         if not user.check_password(request.data['password']):
-            return Response('Incorrext username or password', status=status.HTTP_200_OK)
+            print("wrong password")
+            return Response({"error":'Incorrext username or password'}, status=status.HTTP_400_BAD_REQUEST)
 
         token, c = Token.objects.get_or_create(user=user)
         serializer = UserSerializer(user)

@@ -1,0 +1,34 @@
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <link rel="icon" type="image/svg+xml" href="/vite.svg">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Vite + React</title>
+      <!-- <link href="./output.css" rel="stylesheet"> -->
+      <script type="module" crossorigin="" src="/assets/index-Djfiiwnb.js"></script>
+      <link rel="stylesheet" crossorigin="" href="/assets/index-C78gyiH_.css">
+   </head>
+   <body class="w-full background  h-full overflow-x-hidden overflow-y-scroll">
+      <div id="root">
+         <div class="w-full h-screen flex flex-col ">
+            <nav class="bg-dark w-full z-50"><a class="float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white active" href="/login" aria-current="page">Login</a><a class="float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white" href="/join">Play</a><a class="float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white" href="/layout/boards">Boards</a><a class="float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white" href="/">Home</a></nav>
+            <main class="flex flex-grow">
+               <div class="w-1/3 rounded-lg bg-white shadow-lg mx-auto my-auto py-6 flex flex-col items-center justify-center">
+                  <h2 class="text-xl">Login</h2>
+                  <form action="http://127.0.0.1:8000/login/" method="POST" class="flex py-6 w-2/5 flex-col items-center justify-center">
+                    <input name="username" class="border-2 my-3 w-full h-10 rounded px-1" type="text" placeholder="Username" value="test1">
+                    <input name="password" class="border-2 my-3 w-full h-10 rounded px-1" type="text" placeholder="Password" value="test1">
+                    {% csrf_token %}
+                    <input type="submit">
+                </form>
+                  <h2 class="text-xl">Sign Up</h2>
+                  <form class="flex py-6 w-2/5 flex-col items-center justify-center"><input class="border-2 my-3 w-full h-10 rounded px-1" type="text" placeholder="Username" value="">
+                    <input class="border-2 my-3 w-full h-10 rounded px-1" type="text" placeholder="Password" value="">
+                    <input class="border-2 my-3 w-full h-10 rounded px-1" type="text" placeholder="Confirm Password" value="">
+                    <button class="w-full disabled:bg-opacity-50 border text-xl bg-medium-1 xl:py-3 my-3 rounded-lg text-white">Sign Up</button></form>
+               </div>
+            </main>
+         </div>
+      </div>
+   </body>
+</html>

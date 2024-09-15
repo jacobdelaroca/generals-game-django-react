@@ -24,15 +24,15 @@ const Header = () => {
         // },
     ]
     return (
-        <div className="w-full h-screen flex flex-col bg-gray-100">
-            <nav className="bg-dark w-full">
+        <div className="w-full h-screen flex flex-col ">
+            <nav className="bg-dark w-full z-50">
                 {(credentials.user === "") && <NavLink className='float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white' to={'login'} key={"login key"}>Login</NavLink>}
                 {navItems.map((item, index) => (
                     <NavLink className='float-right text-center justify-center p-4 flex min-w-28 items-center text-2xl hover:text-black hover:bg-light text-white' to={item.link} key={item.name + index.toString()}>{item.name}</NavLink>
                 ))}
             </nav>
             <main 
-            className="background flex flex-grow">
+            className="flex flex-grow">
                 <Outlet />
             </main>
         </div>
