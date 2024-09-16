@@ -124,7 +124,7 @@ class Game():
                     return opponent, opponent_player, None
             
             # same piece but not flags
-            return ' ', None
+            return " ", " ", None
         else:
             if opponent_piece == "f":
                 print("wiiner challenger")
@@ -140,7 +140,7 @@ class Game():
                 return opponent, opponent_player, None
             # same rank both get removed
             else:
-                return ' ', None
+                return " ", " ", None
 
 
     
